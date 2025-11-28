@@ -1,0 +1,24 @@
+RAILWAY'DE ENVIRONMENT VARIABLE EKLEME (HIZLI REHBER)
+
+1. Railway Dashboard → Web Servisinize Tıklayın (mudeir-stok)
+
+2. "Variables" Sekmesine Gidin
+
+3. "+ New Variable" Butonuna Tıklayın
+
+4. Şu Değişkenleri Ekleyin:
+
+   DB_NAME=railway
+   DB_USER=root
+   DB_PASSWORD=xFjQAcmSipWeeJXtwOzjFsPwGRRnPgXj
+   DB_HOST=mysql.railway.internal
+   DB_PORT=3306
+
+5. Her birini ayrı ayrı ekleyin (tek tek "+ New Variable")
+
+6. "Deployments" Sekmesine Gidin → "Redeploy" Yapın
+
+7. Logları Kontrol Edin - "Veritabanı bağlantısı başarılı" mesajını görmelisiniz
+
+ÖNEMLİ: DB_HOST değeri mutlaka "mysql.railway.internal" olmalı!
+

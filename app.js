@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Veritabanı bağlantısını test et ve tabloları senkronize et
 sequelize.authenticate()
   .then(() => {
-    console.log('MySQL bağlantısı başarılı.');
+    console.log('Veritabanı bağlantısı başarılı.');
     return sequelize.sync({ alter: true }); // Tabloları güncelle
   })
   .then(() => {
