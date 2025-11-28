@@ -1,0 +1,93 @@
+<!-- Hero Section -->
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">Müdeir Stok Yönetimi</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            Modern ve kullanıcı dostu stok yönetim sistemi ile ürünlerinizi kolayca yönetin.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="/products" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="bi bi-box"></i> Ürünleri Görüntüle
+            </a>
+            <a href="/admin/products" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-gear"></i> Yönetim Paneli
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">Özellikler</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 py-5">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3">
+                        <i class="bi bi-box-seam text-primary"></i>
+                    </div>
+                    <h3 class="card-title">Stok Takibi</h3>
+                    <p class="card-text">Ürün stoklarınızı gerçek zamanlı takip edin ve stok seviyelerini optimize edin.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3">
+                        <i class="bi bi-graph-up text-primary"></i>
+                    </div>
+                    <h3 class="card-title">Raporlama</h3>
+                    <p class="card-text">Detaylı raporlar ile işletmenizin performansını analiz edin.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3">
+                        <i class="bi bi-people text-primary"></i>
+                    </div>
+                    <h3 class="card-title">Bayi Yönetimi</h3>
+                    <p class="card-text">Bayileriniz için özel fiyatlandırma ve stok yönetimi yapın.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Products Section -->
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">Öne Çıkan Ürünler</h2>
+    <div class="row row-cols-1 row-cols-md-4 g-4 py-5" id="featuredProducts">
+        <!-- Ürünler JavaScript ile yüklenecek -->
+    </div>
+</div>
+
+<script>
+// Öne çıkan ürünleri yükle
+fetch('/api/products/featured/list')
+    .then(response => response.json())
+    .then(products => {
+        const container = document.getElementById('featuredProducts');
+        products.forEach(product => {
+            container.innerHTML += `
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.productName}</h5>
+                            <p class="card-text">${product.description}</p>
+                            <p class="card-text">
+                                <small class="text-muted">Stok: ${product.stock}</small>
+                            </p>
+                            <a href="/products/${product.id}" class="btn btn-primary">
+                                <i class="bi bi-eye"></i> İncele
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    })
+    .catch(error => console.error('Ürünler yüklenirken hata:', error));
+</script>

@@ -1,0 +1,580 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Bayi Yönetimi</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/dashboard">Ana Sayfa</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Bayiler</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="/dealer-applications">
+            <i class="bi bi-inbox me-1"></i> Başvurular
+        </a>
+        <button class="btn btn-outline-secondary" id="refreshDealers">
+            <i class="bi bi-arrow-repeat me-1"></i> Yenile
+        </button>
+        <button class="btn btn-primary" id="addDealerBtn">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Bayi
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-muted small mb-1">Arama</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="dealersSearchInput" placeholder="Bayi adı / kodu / yetkili">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">Aktiflik</label>
+                <select class="form-select" id="dealersStatusFilter">
+                    <option value="">Tümü</option>
+                    <option value="true" selected>Aktif</option>
+                    <option value="false">Pasif</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">Şehir</label>
+                <input type="text" class="form-control" id="dealersCityFilter" placeholder="Örn: İstanbul">
+            </div>
+            <div class="col-md-2 text-md-end">
+                <button class="btn btn-primary w-100 w-md-auto" id="dealersApplyFilters">
+                    <i class="bi bi-funnel me-1"></i> Filtrele
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dealers Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>KOD</th>
+                        <th>BAYİ ADI</th>
+                        <th>İLETİŞİM</th>
+                        <th>LOKASYON</th>
+                        <th>DURUM</th>
+                        <th>SİPARİŞ ÖZETİ</th>
+                        <th class="text-end">İŞLEMLER</th>
+                    </tr>
+                </thead>
+                <tbody id="dealersTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            Kayıtlar yükleniyor...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="text-muted small" id="dealersPaginationSummary">Toplam 0 kayıt</div>
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label text-muted small mb-0" for="dealersPageSizeSelect">Sayfa başına</label>
+                    <select class="form-select form-select-sm w-auto" id="dealersPageSizeSelect">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <nav aria-label="Bayiler sayfalama">
+                    <ul class="pagination pagination-sm mb-0" id="dealersPagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dealer Modal -->
+<div class="modal fade" id="dealerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bayi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dealerForm">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Bayi Kodu</label>
+                            <input type="text" class="form-control" name="code" required>
+                            <div class="form-text">Bayi paneli / entegrasyon için benzersiz kod.</div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Bayi Adı</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Yetkili Kişi</label>
+                            <input type="text" class="form-control" name="contactName">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" class="form-control" name="contactEmail">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Telefon</label>
+                            <input type="text" class="form-control" name="contactPhone">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Adres</label>
+                            <textarea class="form-control" name="address" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Şehir</label>
+                            <input type="text" class="form-control" name="city">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Ülke</label>
+                            <input type="text" class="form-control" name="country" value="Türkiye">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Vergi No</label>
+                            <input type="text" class="form-control" name="taxNumber">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Vergi Dairesi</label>
+                            <input type="text" class="form-control" name="taxOffice">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="isActive" id="dealerIsActive" checked>
+                                <label class="form-check-label" for="dealerIsActive">Aktif</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notlar</label>
+                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger me-auto d-none" id="dealerDeleteBtn">
+                    <i class="bi bi-trash me-1"></i> Bayiyi Sil
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" id="dealerSaveBtn">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dealersTableBody = document.getElementById('dealersTableBody');
+    const dealersPagination = document.getElementById('dealersPagination');
+    const dealersPaginationSummary = document.getElementById('dealersPaginationSummary');
+    const dealersPageSizeSelect = document.getElementById('dealersPageSizeSelect');
+    const dealersSearchInput = document.getElementById('dealersSearchInput');
+    const dealersStatusFilter = document.getElementById('dealersStatusFilter');
+    const dealersCityFilter = document.getElementById('dealersCityFilter');
+    const dealersApplyFilters = document.getElementById('dealersApplyFilters');
+    const refreshDealersBtn = document.getElementById('refreshDealers');
+
+    const dealerModalEl = document.getElementById('dealerModal');
+    const dealerModal = new bootstrap.Modal(dealerModalEl);
+    const dealerForm = document.getElementById('dealerForm');
+    const dealerSaveBtn = document.getElementById('dealerSaveBtn');
+    const dealerDeleteBtn = document.getElementById('dealerDeleteBtn');
+    const addDealerBtn = document.getElementById('addDealerBtn');
+
+    const dealersState = {
+        page: 1,
+        pageSize: Number(dealersPageSizeSelect.value) || 20,
+        totalPages: 1,
+        totalItems: 0,
+        currentFilters: {
+            search: '',
+            isActive: 'true',
+            city: ''
+        }
+    };
+
+    let editingDealerCode = null;
+
+    function formatBoolBadge(isActive) {
+        return isActive
+            ? '<span class="badge bg-success bg-opacity-10 text-success">Aktif</span>'
+            : '<span class="badge bg-secondary">Pasif</span>';
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '-';
+        return date.toLocaleString('tr-TR');
+    }
+
+    function formatCurrency(amount) {
+        if (amount === null || amount === undefined) return '-';
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: 'TRY'
+        }).format(Number(amount) || 0);
+    }
+
+    function renderDealersTable(dealers) {
+        if (!dealers.length) {
+            dealersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        dealersTableBody.innerHTML = dealers.map(dealer => {
+            const summary = dealer.ordersSummary || {
+                totalOrders: 0,
+                totalAmount: 0,
+                totalQuantity: 0,
+                lastOrderAt: null
+            };
+            return `
+                <tr>
+                    <td><code>${dealer.code}</code></td>
+                    <td>
+                        <div>${dealer.name}</div>
+                        <small class="text-muted">${dealer.contactName || '-'}</small>
+                    </td>
+                    <td>
+                        <div>${dealer.contactEmail || '-'}</div>
+                        <small class="text-muted">${dealer.contactPhone || ''}</small>
+                    </td>
+                    <td>
+                        <div>${dealer.city || '-'}${dealer.country ? ' / ' + dealer.country : ''}</div>
+                        <small class="text-muted">${(dealer.address || '').split('\\n')[0] || ''}</small>
+                    </td>
+                    <td>${formatBoolBadge(dealer.isActive)}</td>
+                    <td>
+                        <div class="small">
+                            <div>Toplam: <strong>${summary.totalOrders}</strong> sipariş</div>
+                            <div>Tutar: <strong>${formatCurrency(summary.totalAmount)}</strong></div>
+                            <div class="text-muted">Son: ${formatDate(summary.lastOrderAt)}</div>
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" data-code="${dealer.code}" data-action="edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <a class="btn btn-outline-secondary" href="/orders?dealerCode=${encodeURIComponent(dealer.code)}" title="Siparişleri Gör">
+                                <i class="bi bi-receipt"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function renderPagination() {
+        const { page, totalPages } = dealersState;
+        dealersPagination.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const createPageItem = (targetPage, label, { disabled = false, active = false } = {}) => {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            if (disabled) li.classList.add('disabled');
+            if (active) li.classList.add('active');
+
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.dataset.page = String(targetPage);
+            a.textContent = label;
+
+            li.appendChild(a);
+            dealersPagination.appendChild(li);
+        };
+
+        createPageItem(Math.max(1, page - 1), 'Önceki', { disabled: page === 1 });
+
+        const visiblePages = new Set([1, totalPages, page, page - 1, page + 1]);
+        if (page - 2 > 1) visiblePages.add(page - 2);
+        if (page + 2 < totalPages) visiblePages.add(page + 2);
+
+        const sorted = Array.from(visiblePages).filter(p => p >= 1 && p <= totalPages).sort((a, b) => a - b);
+        let lastPage = 0;
+        sorted.forEach(p => {
+            if (lastPage && p - lastPage > 1) {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = '<span class="page-link">...</span>';
+                dealersPagination.appendChild(li);
+            }
+            createPageItem(p, String(p), { active: p === page });
+            lastPage = p;
+        });
+
+        createPageItem(Math.min(totalPages, page + 1), 'Sonraki', { disabled: page === totalPages });
+    }
+
+    function updateSummary() {
+        const { page, pageSize, totalItems } = dealersState;
+        const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+        const end = totalItems === 0 ? 0 : Math.min(page * pageSize, totalItems);
+        dealersPaginationSummary.textContent = totalItems
+            ? `${start}-${end} / ${totalItems} kayıt`
+            : 'Kayıt bulunamadı.';
+    }
+
+    async function loadDealers(page = dealersState.page) {
+        dealersState.page = Math.max(page, 1);
+        dealersTableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">Yükleniyor...</td>
+            </tr>
+        `;
+
+        try {
+            const params = new URLSearchParams({
+                page: dealersState.page,
+                pageSize: dealersState.pageSize,
+                includeOrdersSummary: 'true'
+            });
+
+            const { search, isActive, city } = dealersState.currentFilters;
+            if (search) params.set('search', search);
+            if (isActive !== '') params.set('isActive', isActive);
+            if (city) params.set('city', city); // city doğrudan filtrelenmese de ileride backend'e eklenebilir
+
+            const response = await fetch(`/api/v1/dealers?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error('Bayiler alınamadı');
+            }
+
+            const result = await response.json();
+            const data = Array.isArray(result.data) ? result.data : [];
+
+            dealersState.totalItems = result.meta?.totalItems ?? data.length;
+            dealersState.totalPages = result.meta?.totalPages ?? 1;
+            dealersState.page = result.meta?.page ?? dealersState.page;
+            dealersState.pageSize = result.meta?.pageSize ?? dealersState.pageSize;
+
+            renderDealersTable(data);
+            renderPagination();
+            updateSummary();
+        } catch (error) {
+            console.error(error);
+            dealersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-danger py-4">
+                        Bayiler alınırken bir hata oluştu. Lütfen tekrar deneyin.
+                    </td>
+                </tr>
+            `;
+            dealersState.totalItems = 0;
+            dealersState.totalPages = 1;
+            dealersState.page = 1;
+            updateSummary();
+        }
+    }
+
+    function fillDealerForm(data) {
+        dealerForm.reset();
+        dealerForm.elements.code.value = data.code || '';
+        dealerForm.elements.name.value = data.name || '';
+        dealerForm.elements.contactName.value = data.contactName || '';
+        dealerForm.elements.contactEmail.value = data.contactEmail || '';
+        dealerForm.elements.contactPhone.value = data.contactPhone || '';
+        dealerForm.elements.address.value = data.address || '';
+        dealerForm.elements.city.value = data.city || '';
+        dealerForm.elements.country.value = data.country || 'Türkiye';
+        dealerForm.elements.taxNumber.value = data.taxNumber || '';
+        dealerForm.elements.taxOffice.value = data.taxOffice || '';
+        dealerForm.elements.notes.value = data.notes || '';
+        document.getElementById('dealerIsActive').checked = data.isActive !== false;
+    }
+
+    function collectDealerForm() {
+        const formData = new FormData(dealerForm);
+        const data = Object.fromEntries(formData.entries());
+        data.isActive = document.getElementById('dealerIsActive').checked;
+        return data;
+    }
+
+    async function openDealerModalForEdit(code) {
+        try {
+            const response = await fetch(`/api/v1/dealers/${encodeURIComponent(code)}?includeOrdersSummary=true`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert('Bayi bulunamadı.');
+                    return;
+                }
+                throw new Error('Bayi bilgisi alınamadı');
+            }
+
+            const result = await response.json();
+            const dealer = result.data;
+            editingDealerCode = dealer.code;
+
+            fillDealerForm(dealer);
+            dealerDeleteBtn.classList.remove('d-none');
+            dealerModal.show();
+        } catch (error) {
+            console.error(error);
+            alert('Bayi bilgisi yüklenirken hata oluştu.');
+        }
+    }
+
+    async function saveDealer() {
+        const data = collectDealerForm();
+        const isEdit = !!editingDealerCode;
+        const url = isEdit
+            ? `/api/v1/dealers/${encodeURIComponent(editingDealerCode)}`
+            : '/api/v1/dealers';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const msg = Array.isArray(result.details)
+                    ? result.details.join(' / ')
+                    : (result.error || 'Kayıt sırasında hata oluştu');
+                throw new Error(msg);
+            }
+
+            dealerModal.hide();
+            editingDealerCode = null;
+            await loadDealers();
+            alert('Bayi kaydedildi.');
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Bayi kaydedilirken hata oluştu.');
+        }
+    }
+
+    async function deleteDealer() {
+        if (!editingDealerCode) return;
+        const confirmed = confirm('Bu bayiyi silmek istediğinize emin misiniz? İlgili siparişler varsa silinemez.');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`/api/v1/dealers/${encodeURIComponent(editingDealerCode)}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                const msg = Array.isArray(result.details)
+                    ? result.details.join(' / ')
+                    : (result.error || 'Bayi silinemedi');
+                throw new Error(msg);
+            }
+
+            dealerModal.hide();
+            editingDealerCode = null;
+            await loadDealers();
+            alert('Bayi silindi.');
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Bayi silinirken hata oluştu.');
+        }
+    }
+
+    dealersPageSizeSelect.addEventListener('change', () => {
+        const value = Number(dealersPageSizeSelect.value);
+        if (Number.isNaN(value) || value <= 0) return;
+        dealersState.pageSize = value;
+        dealersState.page = 1;
+        loadDealers(1);
+    });
+
+    if (dealersPagination) {
+        dealersPagination.addEventListener('click', event => {
+            const link = event.target.closest('a[data-page]');
+            if (!link) return;
+            event.preventDefault();
+            const targetPage = Number(link.dataset.page);
+            if (Number.isNaN(targetPage) || targetPage === dealersState.page) return;
+            loadDealers(targetPage);
+        });
+    }
+
+    dealersApplyFilters.addEventListener('click', () => {
+        dealersState.currentFilters = {
+            search: dealersSearchInput.value.trim(),
+            isActive: dealersStatusFilter.value,
+            city: dealersCityFilter.value.trim()
+        };
+        dealersState.page = 1;
+        loadDealers(1);
+    });
+
+    refreshDealersBtn.addEventListener('click', () => {
+        loadDealers();
+    });
+
+    dealersTableBody.addEventListener('click', event => {
+        const button = event.target.closest('button[data-code]');
+        if (!button) return;
+        const code = button.dataset.code;
+        const action = button.dataset.action;
+        if (action === 'edit') {
+            openDealerModalForEdit(code);
+        }
+    });
+
+    addDealerBtn.addEventListener('click', () => {
+        editingDealerCode = null;
+        dealerForm.reset();
+        document.getElementById('dealerIsActive').checked = true;
+        dealerDeleteBtn.classList.add('d-none');
+        dealerModal.show();
+    });
+
+    dealerSaveBtn.addEventListener('click', () => {
+        saveDealer();
+    });
+
+    dealerDeleteBtn.addEventListener('click', () => {
+        deleteDealer();
+    });
+
+    dealerModalEl.addEventListener('hidden.bs.modal', () => {
+        editingDealerCode = null;
+    });
+
+    loadDealers();
+});
+</script>
+
+

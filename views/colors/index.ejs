@@ -1,0 +1,444 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Renk Yönetimi</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/dashboard">Ana Sayfa</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Renkler</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" id="refreshColors">
+            <i class="bi bi-arrow-repeat me-1"></i> Yenile
+        </button>
+        <button class="btn btn-primary" id="addColorBtn">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Renk
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white border-0 pb-0">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-6">
+                <label class="form-label text-muted small mb-1">Arama</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="colorSearch" placeholder="Resim URL'sinde ara...">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-check form-switch mt-4 pt-1">
+                    <input class="form-check-input" type="checkbox" id="showInactiveOnly">
+                    <label class="form-check-label" for="showInactiveOnly">
+                        Sadece pasif renkleri göster
+                    </label>
+                </div>
+            </div>
+            <div class="col-lg-3 text-lg-end">
+                <span class="text-muted small">
+                    Toplam <span class="fw-semibold" id="colorCount">0</span> renk
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="colorsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Önizleme</th>
+                        <th>Adı</th>
+                        <th>Resim URL</th>
+                        <th>Durum</th>
+                        <th class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Renkler yükleniyor...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="colorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Renk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="colorForm">
+                <div class="mb-3">
+                    <label class="form-label">Renk Resmi</label>
+                    <input type="file" class="form-control" name="image" accept="image/*" required>
+                    <div class="form-text">En fazla 5 MB boyutunda bir resim yükleyebilirsiniz.</div>
+                </div>
+                <div class="mb-3 d-none" id="previewWrapper">
+                    <label class="form-label">Önizleme</label>
+                    <div class="border rounded d-flex justify-content-center align-items-center p-2" style="min-height: 120px;">
+                        <img id="colorPreview" src="" alt="Renk önizleme" style="max-width: 100%; max-height: 180px; object-fit: contain;">
+                    </div>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" name="isActive" checked>
+                    <label class="form-check-label">Aktif</label>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" id="saveColorBtn">
+                    <i class="bi bi-save me-1"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof bootstrap === 'undefined') return;
+
+    const tableBody = document.querySelector('#colorsTable tbody');
+    const colorCountEl = document.getElementById('colorCount');
+    const searchInput = document.getElementById('colorSearch');
+    const showInactiveOnlySwitch = document.getElementById('showInactiveOnly');
+    const refreshBtn = document.getElementById('refreshColors');
+    const addBtn = document.getElementById('addColorBtn');
+    const saveBtn = document.getElementById('saveColorBtn');
+    const modalElement = document.getElementById('colorModal');
+    const modal = new bootstrap.Modal(modalElement);
+    const form = document.getElementById('colorForm');
+    const imageInput = form.querySelector('[name="image"]');
+    const isActiveInput = form.querySelector('[name="isActive"]');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const previewImg = document.getElementById('colorPreview');
+
+    let colors = [];
+    let currentId = null;
+    let previewObjectUrl = null;
+
+    function showAlert(message, type = 'success') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.role = 'alert';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+        `;
+        document.querySelector('.main-content').prepend(alert);
+        setTimeout(() => alert.remove(), 4000);
+    }
+
+    function escapeHtml(text) {
+        return String(text ?? '').replace(/[&<>"']/g, (char) => {
+            switch (char) {
+                case '&': return '&amp;';
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '"': return '&quot;';
+                case '\'': return '&#39;';
+                default: return char;
+            }
+        });
+    }
+
+    function renderTable() {
+        const query = searchInput.value.trim().toLowerCase();
+        const showInactiveOnly = showInactiveOnlySwitch.checked;
+
+        const filtered = colors.filter(color => {
+            if (showInactiveOnly) {
+                if (color.isActive) return false;
+            } else if (!color.isActive) {
+                return false;
+            }
+            if (!query) return true;
+            const haystack = [color.label, color.imageUrl]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return haystack.includes(query);
+        });
+
+        colorCountEl.textContent = filtered.length.toString();
+
+        if (!filtered.length) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Renk kaydı bulunamadı.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(color => {
+            const statusClass = color.isActive ? 'badge bg-success bg-opacity-10 text-success' : 'badge bg-secondary';
+            const statusText = color.isActive ? 'Aktif' : 'Pasif';
+            const imageCell = color.imageUrl
+                ? `<img src="${escapeHtml(color.imageUrl)}" alt="Renk" class="rounded border" style="width: 64px; height: 64px; object-fit: cover;">`
+                : '<span class="text-muted">-</span>';
+            return `
+                <tr data-id="${color.id}">
+                    <td>${imageCell}</td>
+                    <td>${escapeHtml(color.label || '') || '<span class="text-muted">-</span>'}</td>
+                    <td>${color.imageUrl ? `<a href="${escapeHtml(color.imageUrl)}" target="_blank" rel="noopener">${escapeHtml(color.imageUrl)}</a>` : '<span class="text-muted">-</span>'}</td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" data-action="edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" data-action="toggle">
+                                <i class="bi ${color.isActive ? 'bi-pause-circle' : 'bi-play-circle'}"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" data-action="delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function loadColors() {
+        try {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Yükleniyor...</td>
+                </tr>
+            `;
+            const response = await fetch('/api/colors?includeInactive=true');
+            if (!response.ok) {
+                throw new Error('Renkler getirilemedi');
+            }
+            const data = await response.json();
+            colors = Array.isArray(data) ? data.map(item => ({
+                id: item.id,
+                label: item.label || '',
+                imageUrl: item.imageUrl || '',
+                isActive: item.isActive !== undefined ? !!item.isActive : true
+            })) : [];
+            renderTable();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Beklenmeyen bir hata oluştu', 'danger');
+        }
+    }
+
+    function clearPreviewObjectUrl() {
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = null;
+        }
+    }
+
+    function updatePreview(url, { isObjectUrl = false } = {}) {
+        clearPreviewObjectUrl();
+        if (!url) {
+            previewWrapper.classList.add('d-none');
+            previewImg.removeAttribute('src');
+            return;
+        }
+        if (isObjectUrl) {
+            previewObjectUrl = url;
+        }
+        previewWrapper.classList.remove('d-none');
+        previewImg.src = url;
+    }
+
+    function updatePreviewFromFile(file) {
+        if (!file) {
+            updatePreview(imageInput.dataset.currentUrl || '');
+            return;
+        }
+        const objectUrl = URL.createObjectURL(file);
+        updatePreview(objectUrl, { isObjectUrl: true });
+    }
+
+    function setCurrentImageUrl(url) {
+        imageInput.dataset.currentUrl = url || '';
+    }
+
+    function resetForm({ focus = true } = {}) {
+        currentId = null;
+        form.reset();
+        isActiveInput.checked = true;
+        imageInput.required = true;
+        clearPreviewObjectUrl();
+        setCurrentImageUrl('');
+        updatePreview('');
+        if (focus) {
+            setTimeout(() => imageInput.focus(), 150);
+        }
+    }
+
+    function populateForm(color) {
+        currentId = color.id;
+        imageInput.value = '';
+        imageInput.required = false;
+        isActiveInput.checked = !!color.isActive;
+        setCurrentImageUrl(color.imageUrl || '');
+        updatePreview(color.imageUrl || '');
+        setTimeout(() => imageInput.focus(), 150);
+    }
+
+    async function submitForm() {
+        try {
+            const isActive = isActiveInput.checked;
+            const imageFile = imageInput.files[0];
+
+            if (!currentId && !imageFile) {
+                showAlert('Renk resmi zorunludur.', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+            formData.append('isActive', isActive ? 'true' : 'false');
+
+            const endpoint = currentId ? `/api/colors/${currentId}` : '/api/colors';
+            const method = currentId ? 'PUT' : 'POST';
+
+            const response = await fetch(endpoint, {
+                method,
+                body: formData
+            });
+
+            if (!response.ok) {
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    // yoksay
+                }
+                throw new Error(result.details || result.error || 'Kayıt sırasında hata oluştu');
+            }
+
+            modal.hide();
+            showAlert('Renk kaydedildi');
+            await loadColors();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Renk kaydedilirken hata oluştu', 'danger');
+        }
+    }
+
+    async function toggleColor(id) {
+        const color = colors.find(item => item.id === id);
+        if (!color) return;
+
+        try {
+            const response = await fetch(`/api/colors/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isActive: !color.isActive })
+            });
+            if (!response.ok) {
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    // yoksay
+                }
+                throw new Error(result.details || result.error || 'Durum güncellenemedi');
+            }
+            showAlert('Renk durumu güncellendi');
+            await loadColors();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Durum güncellenirken hata oluştu', 'danger');
+        }
+    }
+
+    async function deleteColor(id) {
+        if (!confirm('Bu rengi silmek istiyor musunuz?')) return;
+
+        try {
+            const response = await fetch(`/api/colors/${id}`, { method: 'DELETE' });
+            if (!response.ok) {
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    // yoksay
+                }
+                throw new Error(result.details || result.error || 'Renk silinemedi');
+            }
+            showAlert('Renk silindi');
+            await loadColors();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Renk silinirken hata oluştu', 'danger');
+        }
+    }
+
+    tableBody.addEventListener('click', event => {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+
+        const row = button.closest('tr');
+        const id = Number(row.dataset.id);
+        const color = colors.find(item => item.id === id);
+        if (!color) return;
+
+        if (button.dataset.action === 'edit') {
+            resetForm();
+            populateForm(color);
+            modal.show();
+            return;
+        }
+
+        if (button.dataset.action === 'toggle') {
+            toggleColor(id);
+            return;
+        }
+
+        if (button.dataset.action === 'delete') {
+            deleteColor(id);
+            return;
+        }
+    });
+
+    addBtn.addEventListener('click', () => {
+        resetForm();
+        modal.show();
+    });
+
+    saveBtn.addEventListener('click', submitForm);
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+        submitForm();
+    });
+
+    searchInput.addEventListener('input', renderTable);
+    showInactiveOnlySwitch.addEventListener('change', renderTable);
+    refreshBtn.addEventListener('click', loadColors);
+
+    imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
+        updatePreviewFromFile(file || null);
+    });
+
+    modalElement.addEventListener('shown.bs.modal', () => {
+        imageInput.focus();
+    });
+
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        resetForm({ focus: false });
+    });
+
+    loadColors();
+});
+</script>
+
+

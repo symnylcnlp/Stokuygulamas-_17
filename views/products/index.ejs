@@ -1,0 +1,1983 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Tactical & Outdoor Ürün Yönetimi</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                <li class="breadcrumb-item active">Ürünler</li>
+            </ol>
+        </nav>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="bi bi-plus-lg"></i> Yeni Ürün
+    </button>
+</div>
+
+<!-- Filtreler -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Kategori</label>
+                <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="kategoriFilterSearch" placeholder="Kategori ara...">
+                </div>
+                <select class="form-select" id="kategoriFilter">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Stok Durumu</label>
+                <select class="form-select" id="stokFilter">
+                    <option value="">Tümü</option>
+                    <option value="var">Stokta Var</option>
+                    <option value="az">Stok Az</option>
+                    <option value="yok">Stokta Yok</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Arama</label>
+                <input type="text" class="form-control" id="searchInput" placeholder="Ürün adı veya kodu...">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary w-100" id="filterButton">
+                    <i class="bi bi-funnel"></i> Filtrele
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ürün Tablosu -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ÜRÜN KODU</th>
+                        <th>ÜRÜN ADI</th>
+                        <th>KATEGORİ</th>
+                        <th>PERAKENDE FİYAT</th>
+                        <th>BAYİ FİYAT</th>
+                        <th>STOK</th>
+                        <th>DURUM</th>
+                        <th>İŞLEMLER</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <!-- JavaScript ile doldurulacak -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="text-muted small" id="productsPaginationSummary">Toplam 0 kayıt</div>
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label text-muted small mb-0" for="productPageSizeSelect">Sayfa başına</label>
+                    <select class="form-select form-select-sm w-auto" id="productPageSizeSelect">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <nav aria-label="Ürünler sayfalama">
+                    <ul class="pagination pagination-sm mb-0" id="productsPagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Ürün Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Ürün Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Ürün Adı</label>
+                            <input type="text" class="form-control" name="urunAdi" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ürün Kodu (Otomatik)</label>
+                            <input type="text" class="form-control" name="urunKodu" id="urunKoduField" readonly>
+                            <div class="form-text">Ürün adı, renk ve bedenlere göre otomatik oluşturulur.</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Kategori</label>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="kategoriSelectSearch" placeholder="Kategori ara...">
+                            </div>
+                            <select class="form-select" name="kategori" id="kategoriSelect" required>
+                                <option value="">Kategori seçin...</option>
+                            </select>
+                            <div class="form-text">Kategoriler listeden seçilir. Alt kategori seçerseniz ilgili değer kaydedilir.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stok Sayısı</label>
+                            <input type="number" class="form-control" name="stokSayisi" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Perakende Fiyat</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" step="0.01" class="form-control" name="urunFiyati" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bayi Fiyat</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" step="0.01" class="form-control" name="bayiFiyati" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="indirimContainer" style="display: none;">
+                            <label class="form-label">İndirim Oranı (%)</label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" min="0" max="100" class="form-control" name="indirimOrani" placeholder="Örn: 20">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bedenler</label>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="sizeSelectSearch" placeholder="Beden ara...">
+                        </div>
+                        <div class="input-group">
+                            <select class="form-select" id="sizeSelect" aria-label="Beden seçimi">
+                                <option value="">Beden seçin...</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-primary" id="addSizeBtn">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" name="bedenler" id="selectedSizesInput">
+                        <div id="selectedSizes" class="mt-2 text-muted small">Henüz beden seçilmedi.</div>
+                        <div class="form-text">Listeden beden seçip <strong>Ekle</strong> butonuna tıklayın. Seçim yapılmazsa stok kodu 'STD' ile oluşturulur.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Renkler</label>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="colorSelectSearch" placeholder="Renk ara...">
+                        </div>
+                        <div class="input-group">
+                            <select class="form-select" id="colorSelect" aria-label="Renk seçimi">
+                                <option value="">Renk seçin...</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-primary" id="addColorBtn">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" name="renkler" id="selectedColorsInput">
+                        <div id="selectedColors" class="mt-2 text-muted small">Henüz renk seçilmedi.</div>
+                        <div class="form-text">Renkler aktif/pasif durumlarına göre listelenir (pasif renkler gri gösterilir). Seçmek için listeden bir renk belirleyip <strong>Ekle</strong> butonuna tıklayın.</div>
+                    </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Oluşan Stok Kodları</label>
+                    <div class="border rounded p-3 bg-light" id="stockCodePreview">
+                        <span class="text-muted">Henüz kod üretilmedi</span>
+                    </div>
+                </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" name="aciklama" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ürün Detayları</label>
+                        <textarea class="form-control" name="urunDetaylari" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="oneCikan" id="oneCikan">
+                            <label class="form-check-label" for="oneCikan">
+                                Öne Çıkan Ürün
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" id="saveProduct">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.selected-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.65rem;
+    margin: 0.25rem 0.35rem 0 0;
+    border-radius: 999px;
+    background-color: #f1f3f5;
+    border: 1px solid #dee2e6;
+    font-size: 0.875rem;
+    color: #212529;
+}
+
+.selected-item img {
+    width: 22px;
+    height: 22px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #dee2e6;
+}
+
+.selected-item .remove-item {
+    cursor: pointer;
+    color: #dc3545;
+    font-weight: 600;
+}
+</style>
+
+<script>
+// Beden aralığı işlemleri
+function generateBedenler(baslangic, bitis, artis) {
+    const bedenler = [];
+    const startText = baslangic ? baslangic.toString().trim() : '';
+    const endText = bitis ? bitis.toString().trim() : '';
+    const stepText = artis ? artis.toString().trim() : '';
+
+    const startNumber = parseInt(startText, 10);
+    const endNumber = parseInt(endText, 10);
+    const hasStartNumber = !Number.isNaN(startNumber);
+    const hasEndNumber = !Number.isNaN(endNumber);
+
+    if (hasStartNumber && hasEndNumber) {
+        const stepNumber = parseInt(stepText, 10);
+        const step = !Number.isNaN(stepNumber) && stepNumber > 0 ? stepNumber : 1;
+        for (let i = startNumber; i <= endNumber; i += step) {
+            bedenler.push(i.toString());
+        }
+        return bedenler;
+    }
+
+    if (hasStartNumber && !endText) {
+        bedenler.push(startNumber.toString());
+        return bedenler;
+    }
+
+    // Alfabetik beden (XS, S, M, L, XL vb.)
+    if (startText && endText) {
+        const bedenSirasi = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+        const startIndex = bedenSirasi.indexOf(startText);
+        const endIndex = bedenSirasi.indexOf(endText);
+
+        if (startIndex !== -1 && endIndex !== -1) {
+            for (let i = startIndex; i <= endIndex; i++) {
+                bedenler.push(bedenSirasi[i]);
+            }
+            return bedenler;
+        }
+    }
+
+    if (startText) {
+        bedenler.push(startText);
+    } else if (endText) {
+        bedenler.push(endText);
+    }
+
+    return bedenler;
+}
+
+const STOCK_CODE_PREFIX = window.STOCK_CODE_PREFIX || 'M';
+const TURKISH_CHAR_MAP = {
+    'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+    'Ç': 'C', 'Ğ': 'G', 'İ': 'I', 'Ö': 'O', 'Ş': 'S', 'Ü': 'U',
+    'â': 'a', 'Â': 'A', 'î': 'i', 'Î': 'I', 'û': 'u', 'Û': 'U'
+};
+
+let colorOptionsList = [];
+let sizeOptionsList = [];
+let categoriesList = [];
+let optionsReadyPromise = null;
+let editingProductId = null;
+const selectedSizeValues = new Set();
+const selectedColorLabels = new Set();
+let sizeSelectSearchQuery = '';
+let colorSelectSearchQuery = '';
+let kategoriFilterOptions = [];
+let kategoriFilterSearchQuery = '';
+let kategoriFilterValue = '';
+
+function normalizeDecimal(value, { defaultValue = 0, allowNull = false } = {}) {
+    if (value === undefined || value === null) {
+        return allowNull ? null : defaultValue;
+    }
+    const stringValue = String(value).replace(',', '.').trim();
+    if (!stringValue) {
+        return allowNull ? null : defaultValue;
+    }
+    const numericValue = Number(stringValue);
+    if (Number.isNaN(numericValue)) {
+        return allowNull ? null : defaultValue;
+    }
+    return numericValue;
+}
+
+function normalizeInteger(value, { defaultValue = 0, min } = {}) {
+    if (value === undefined || value === null) {
+        return defaultValue;
+    }
+    const parsed = Number.parseInt(String(value).trim(), 10);
+    if (Number.isNaN(parsed)) {
+        return defaultValue;
+    }
+    if (typeof min === 'number' && parsed < min) {
+        return min;
+    }
+    return parsed;
+}
+
+function normalizeProductNumericFields(data) {
+    data.stokSayisi = normalizeInteger(data.stokSayisi, { defaultValue: 0, min: 0 });
+    data.urunFiyati = normalizeDecimal(data.urunFiyati, { defaultValue: 0 });
+    data.bayiFiyati = normalizeDecimal(data.bayiFiyati, { defaultValue: 0 });
+
+    if (data.indirimOrani === undefined || data.indirimOrani === null || data.indirimOrani === '') {
+        delete data.indirimOrani;
+    } else {
+        const discount = normalizeDecimal(data.indirimOrani, { allowNull: true });
+        if (discount === null) {
+            delete data.indirimOrani;
+        } else {
+            data.indirimOrani = discount;
+        }
+    }
+}
+
+function sanitizeSizeForStorage(value) {
+    const trimmed = String(value ?? '').trim();
+    if (!trimmed) return 'STD';
+
+    const withoutCm = trimmed.replace(/\s*cm$/i, '').trim();
+    return withoutCm || 'STD';
+}
+
+function addSizeValue(value) {
+    const trimmed = String(value || '').trim();
+    if (!trimmed) return;
+    selectedSizeValues.add(trimmed);
+    renderSelectedSizes();
+    updateStockCodeFields();
+}
+
+function addColorLabel(label) {
+    const trimmed = String(label || '').trim();
+    if (!trimmed) return;
+    selectedColorLabels.add(trimmed);
+    renderSelectedColors();
+    updateStockCodeFields();
+}
+
+const productPagination = {
+    page: 1,
+    pageSize: 20,
+    totalPages: 1,
+    totalItems: 0
+};
+
+const productPageSizeSelect = document.getElementById('productPageSizeSelect');
+if (productPageSizeSelect) {
+    const initialSize = Number(productPageSizeSelect.value);
+    if (!Number.isNaN(initialSize) && initialSize > 0) {
+        productPagination.pageSize = initialSize;
+    }
+}
+const productsPagination = document.getElementById('productsPagination');
+const productsPaginationSummary = document.getElementById('productsPaginationSummary');
+
+const ALPHA_SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', 'OS', 'STD'];
+
+function normalizeLabelKey(label = '') {
+    return label.trim().toLowerCase();
+}
+
+function deriveColorLabel(color = {}) {
+    if (color.label && color.label.trim()) {
+        return color.label.trim();
+    }
+    const imageUrl = color.imageUrl || '';
+    if (imageUrl) {
+        const fileName = imageUrl.split('/').filter(Boolean).pop() || '';
+        if (fileName) {
+            const withoutExt = fileName.replace(/\.[^/.]+$/, '');
+            const cleaned = withoutExt.replace(/[-_]+/g, ' ').trim();
+            if (cleaned) {
+                return cleaned;
+            }
+        }
+    }
+    if (typeof color.id !== 'undefined') {
+        return `Renk ${color.id}`;
+    }
+    return 'Renk';
+}
+
+function sizeComparator(a, b) {
+    const normalizedA = String(a || '').trim();
+    const normalizedB = String(b || '').trim();
+    if (!normalizedA && !normalizedB) return 0;
+    if (!normalizedA) return 1;
+    if (!normalizedB) return -1;
+
+    const numericPattern = /^\d+(?:\.\d+)?$/;
+    const isNumA = numericPattern.test(normalizedA);
+    const isNumB = numericPattern.test(normalizedB);
+    if (isNumA && isNumB) {
+        return Number(normalizedA) - Number(normalizedB);
+    }
+    if (isNumA) return -1;
+    if (isNumB) return 1;
+
+    const upperA = normalizedA.toUpperCase();
+    const upperB = normalizedB.toUpperCase();
+    const indexA = ALPHA_SIZE_ORDER.indexOf(upperA);
+    const indexB = ALPHA_SIZE_ORDER.indexOf(upperB);
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+
+    return upperA.localeCompare(upperB, 'tr', { sensitivity: 'base' });
+}
+
+function ensureOptionsReady() {
+    if (!optionsReadyPromise) {
+        optionsReadyPromise = initializeProductFormOptions();
+    }
+    return optionsReadyPromise;
+}
+
+function parseArrayLike(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+        } catch (error) {
+            // yoksay
+        }
+        return value
+            .split(/[\n,]/)
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+    return [];
+}
+
+function escapeHtml(text = '') {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function transliterate(text = '') {
+    return text
+        .split('')
+        .map(char => TURKISH_CHAR_MAP[char] || char)
+        .join('');
+}
+
+function sanitizeWord(word = '') {
+    return transliterate(word)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '');
+}
+
+function extractBaseName(urunAdi = '') {
+    const trimmed = urunAdi.trim();
+    if (!trimmed) return '';
+    const match = trimmed.match(/\b([^\s]+(?:\s*\/\s*[^\s]+)+)$/);
+    if (!match) return trimmed;
+    const combo = match[0];
+    const base = trimmed.slice(0, trimmed.length - combo.length).trim();
+    return base || trimmed;
+}
+
+function generateBaseCode(urunAdi = '') {
+    const baseName = extractBaseName(urunAdi);
+    const words = baseName.split(/\s+/).filter(Boolean).map(sanitizeWord).filter(Boolean);
+    if (!words.length) return '';
+
+    const isNumericWord = (word) => /^\d+$/.test(word);
+
+    return words.reduce((acc, word, index) => {
+        if (isNumericWord(word)) {
+            return acc + word;
+        }
+        if (index === 0) {
+            return acc + word.charAt(0);
+        }
+        if (index === 1) {
+            return acc + word.slice(0, Math.min(3, word.length));
+        }
+        return acc + word.charAt(0);
+    }, '');
+}
+
+function normalizeCombo(combo = '') {
+    return combo
+        .split('/')
+        .map(part => part.trim())
+        .filter(Boolean)
+        .join('/');
+}
+
+function fallbackCombosFromName(urunAdi = '') {
+    const match = urunAdi?.trim().match(/([^\s]+(?:\s*\/\s*[^\s]+)+)$/);
+    if (match) {
+        const normalized = normalizeCombo(match[0]);
+        return normalized ? [normalized] : [];
+    }
+    return [];
+}
+
+function generateColorCode(combo = '') {
+    if (!combo) return 'STD';
+    const normalized = normalizeCombo(combo);
+    if (!normalized) return 'STD';
+
+    return normalized.split('/').map(part => {
+        const sanitized = sanitizeWord(part);
+        return sanitized ? sanitized.charAt(0) : 'X';
+    }).join('');
+}
+
+function normalizeSizeCode(size) {
+    if (size === undefined || size === null) return 'STD';
+    const value = String(size).trim();
+    if (!value) return 'STD';
+    const sanitized = sanitizeWord(value);
+    if (!sanitized) return 'STD';
+
+    if (sanitized.endsWith('CM') && sanitized.length > 2) {
+        return sanitized.slice(0, -2);
+    }
+
+    return sanitized;
+}
+
+function parseColorCombosInput() {
+    return [];
+}
+
+function getSizeSelectElement() {
+    return document.getElementById('sizeSelect');
+}
+
+function getColorSelectElement() {
+    return document.getElementById('colorSelect');
+}
+
+function collectBedenlerFromForm() {
+    return Array.from(selectedSizeValues).sort(sizeComparator);
+}
+
+function getSelectedColorNames() {
+    return Array.from(selectedColorLabels)
+        .map(label => label.trim())
+        .filter(Boolean)
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase(), 'tr', { sensitivity: 'base' }));
+}
+
+function syncSelectedSizesInput() {
+    const input = document.getElementById('selectedSizesInput');
+    if (!input) return;
+    const values = collectBedenlerFromForm();
+    input.value = JSON.stringify(values);
+}
+
+function syncSelectedColorsInput() {
+    const input = document.getElementById('selectedColorsInput');
+    if (!input) return;
+    const values = getSelectedColorNames();
+    input.value = JSON.stringify(values);
+}
+
+function restoreSelectionsFromInputs() {
+    let restored = false;
+
+    if (!selectedSizeValues.size) {
+        const storedSizes = parseArrayLike(document.getElementById('selectedSizesInput')?.value);
+        storedSizes.forEach(size => {
+            const trimmed = String(size || '').trim();
+            if (!trimmed) return;
+            restored = true;
+            selectedSizeValues.add(trimmed);
+        });
+    }
+
+    if (!selectedColorLabels.size) {
+        const storedColors = parseArrayLike(document.getElementById('selectedColorsInput')?.value);
+        storedColors.forEach(color => {
+            const trimmed = String(color || '').trim();
+            if (!trimmed) return;
+            restored = true;
+            selectedColorLabels.add(trimmed);
+        });
+    }
+
+    if (restored) {
+        renderSelectedSizes();
+        renderSelectedColors();
+        updateStockCodeFields();
+    }
+}
+
+function buildStockCodeData(form) {
+    const urunAdi = form.querySelector('[name="urunAdi"]').value || '';
+    const combosFromTextarea = parseColorCombosInput().map(normalizeCombo).filter(Boolean);
+    const combosFromColors = getSelectedColorNames().map(normalizeCombo).filter(Boolean);
+
+    let combos = combosFromTextarea.length ? combosFromTextarea : combosFromColors;
+    if (!combos.length) {
+        combos = fallbackCombosFromName(urunAdi);
+    }
+    if (!combos.length) {
+        combos = ['Tek'];
+    }
+
+    const bedenler = collectBedenlerFromForm();
+    const canonicalSizes = (bedenler.length ? bedenler : ['STD']).map(sanitizeSizeForStorage);
+
+    const baseCode = generateBaseCode(urunAdi);
+    const fullBaseCode = baseCode ? `${STOCK_CODE_PREFIX}-${baseCode}` : STOCK_CODE_PREFIX;
+
+    const varyantlar = [];
+    combos.forEach(combo => {
+        const colorCode = generateColorCode(combo);
+        canonicalSizes.forEach(size => {
+            const sizeCode = normalizeSizeCode(size);
+            const parts = [STOCK_CODE_PREFIX];
+            if (baseCode) {
+                parts.push(baseCode);
+            }
+            parts.push(colorCode, sizeCode);
+            varyantlar.push({
+                renk: combo,
+                beden: size,
+                stokKodu: parts.filter(Boolean).join('-'),
+                renkKodu: colorCode
+            });
+        });
+    });
+
+    return {
+        baseCode: fullBaseCode,
+        varyantlar,
+        renkKombinasyonlari: combos,
+        bedenler: canonicalSizes,
+        primaryStockCode: varyantlar.length ? varyantlar[0].stokKodu : fullBaseCode
+    };
+}
+
+function renderStockCodePreview(stockData) {
+    const preview = document.getElementById('stockCodePreview');
+    const urunKoduField = document.getElementById('urunKoduField');
+
+    if (!preview || !urunKoduField) return;
+
+    if (!stockData || !stockData.varyantlar.length) {
+        preview.innerHTML = '<span class="text-muted">Henüz kod üretilmedi</span>';
+        urunKoduField.value = stockData?.primaryStockCode || '';
+        return;
+    }
+
+    urunKoduField.value = stockData.primaryStockCode;
+
+    const liste = stockData.varyantlar.map(varyant => {
+        const detay = [varyant.renk];
+        if (varyant.beden && varyant.beden !== 'STD') {
+            detay.push(varyant.beden);
+        }
+        return `<li class="mb-1"><code>${varyant.stokKodu}</code> <span class="text-muted">(${detay.filter(Boolean).join(' - ')})</span></li>`;
+    }).join('');
+
+    preview.innerHTML = `
+        <div class="mb-2"><strong>Ana Kod:</strong> <code>${stockData.baseCode}</code></div>
+        <ul class="mb-0 ps-3">${liste}</ul>
+    `;
+}
+
+function updateStockCodeFields() {
+    const form = document.getElementById('productForm');
+    if (!form) return;
+    const stockData = buildStockCodeData(form);
+    renderStockCodePreview(stockData);
+    return stockData;
+}
+
+function renderProductPagination() {
+    if (!productsPagination || !productsPaginationSummary) return;
+
+    const { page, pageSize, totalPages, totalItems } = productPagination;
+    const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+    const end = totalItems === 0 ? 0 : Math.min(page * pageSize, totalItems);
+
+    productsPaginationSummary.textContent = totalItems
+        ? `${start}-${end} / ${totalItems} kayıt`
+        : 'Kayıt bulunamadı.';
+
+    productsPagination.innerHTML = '';
+
+    if (totalPages <= 1) {
+        return;
+    }
+
+    const createPageItem = (targetPage, label, { disabled = false, active = false, ariaLabel } = {}) => {
+        const li = document.createElement('li');
+        li.className = 'page-item';
+        if (disabled) li.classList.add('disabled');
+        if (active) li.classList.add('active');
+
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.dataset.page = String(targetPage);
+        a.textContent = label;
+        if (ariaLabel) {
+            a.setAttribute('aria-label', ariaLabel);
+        }
+
+        li.appendChild(a);
+        productsPagination.appendChild(li);
+    };
+
+    const createEllipsis = () => {
+        const li = document.createElement('li');
+        li.className = 'page-item disabled';
+        li.innerHTML = '<span class="page-link">...</span>';
+        productsPagination.appendChild(li);
+    };
+
+    createPageItem(Math.max(1, page - 1), 'Önceki', { disabled: page === 1, ariaLabel: 'Önceki sayfa' });
+
+    const visiblePages = new Set([1, totalPages, page, page - 1, page + 1]);
+    if (page - 2 > 1) visiblePages.add(page - 2);
+    if (page + 2 < totalPages) visiblePages.add(page + 2);
+
+    const sortedPages = Array.from(visiblePages)
+        .filter(p => p >= 1 && p <= totalPages)
+        .sort((a, b) => a - b);
+
+    let lastPage = 0;
+    sortedPages.forEach(p => {
+        if (lastPage && p - lastPage > 1) {
+            createEllipsis();
+        }
+        createPageItem(p, String(p), { active: p === page, ariaLabel: `${p}. sayfa` });
+        lastPage = p;
+    });
+
+    createPageItem(Math.min(totalPages, page + 1), 'Sonraki', { disabled: page === totalPages, ariaLabel: 'Sonraki sayfa' });
+}
+
+function renderKategoriFilterOptions() {
+    const select = document.getElementById('kategoriFilter');
+    if (!select) return;
+
+    const previousValue = kategoriFilterValue || select.value || '';
+    const query = (kategoriFilterSearchQuery || '').trim().toLowerCase();
+    const filteredOptions = query
+        ? kategoriFilterOptions.filter(option => option.toLowerCase().includes(query))
+        : kategoriFilterOptions.slice();
+
+    select.innerHTML = '<option value="">Tümü</option>';
+
+    if (!filteredOptions.length) {
+        const placeholder = new Option('Eşleşme bulunamadı', '', false, false);
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        select.appendChild(placeholder);
+        kategoriFilterValue = '';
+        return;
+    }
+
+    if (previousValue && !filteredOptions.includes(previousValue)) {
+        kategoriFilterValue = '';
+    }
+
+    filteredOptions.forEach(option => {
+        const shouldSelect = (kategoriFilterValue && option === kategoriFilterValue) ||
+            (!kategoriFilterValue && previousValue && option === previousValue);
+        const opt = new Option(option, option, false, shouldSelect);
+        select.appendChild(opt);
+    });
+
+    if (kategoriFilterValue && filteredOptions.includes(kategoriFilterValue)) {
+        select.value = kategoriFilterValue;
+    } else if (previousValue && filteredOptions.includes(previousValue)) {
+        select.value = previousValue;
+        kategoriFilterValue = previousValue;
+    } else {
+        select.value = '';
+        kategoriFilterValue = '';
+    }
+
+    kategoriFilterValue = select.value;
+}
+
+function setKategoriFilterOptions(options = []) {
+    kategoriFilterOptions = Array.from(new Set(
+        options
+            .map(option => String(option || '').trim())
+            .filter(Boolean)
+    ));
+    renderKategoriFilterOptions();
+}
+
+function setSizeOptions(options = [], selectedValues) {
+    const select = getSizeSelectElement();
+    if (!select) return;
+
+    const normalizedOptions = Array.from(new Set(
+        options
+            .map(value => String(value || '').trim())
+            .filter(Boolean)
+    )).sort(sizeComparator);
+
+    sizeOptionsList = normalizedOptions;
+
+    const desiredSelection = (selectedValues ?? Array.from(selectedSizeValues))
+        .filter(value => normalizedOptions.includes(value));
+
+    selectedSizeValues.clear();
+    desiredSelection.forEach(value => selectedSizeValues.add(value));
+
+    select.innerHTML = '';
+
+    if (!normalizedOptions.length) {
+        selectedSizeValues.clear();
+        select.disabled = true;
+        const placeholder = new Option('Beden bulunamadı', '', false, true);
+        placeholder.disabled = true;
+        select.appendChild(placeholder);
+        updateStockCodeFields();
+        renderSelectedSizes();
+        return;
+    }
+
+    const query = (sizeSelectSearchQuery || '').trim().toLocaleLowerCase('tr');
+    const filteredOptions = query
+        ? normalizedOptions.filter(value => value.toLocaleLowerCase('tr').includes(query))
+        : normalizedOptions;
+
+    select.disabled = false;
+    const placeholderText = filteredOptions.length ? 'Beden seçin...' : 'Eşleşme bulunamadı';
+    const placeholder = new Option(placeholderText, '', false, false);
+    placeholder.disabled = true;
+    if (!selectedSizeValues.size || !filteredOptions.length) {
+        placeholder.selected = true;
+    }
+    select.appendChild(placeholder);
+
+    if (filteredOptions.length) {
+        filteredOptions.forEach(value => {
+            const option = new Option(value, value, false, selectedSizeValues.has(value));
+            select.appendChild(option);
+        });
+    } else {
+        select.value = '';
+    }
+
+    renderSelectedSizes();
+    updateStockCodeFields();
+}
+
+function setColorOptions(options = [], selectedLabels) {
+    const select = getColorSelectElement();
+    if (!select) return;
+
+    const labelSet = new Set();
+    const normalizedColors = [];
+
+    options.forEach(option => {
+        const label = deriveColorLabel(option);
+        const key = normalizeLabelKey(label);
+        if (labelSet.has(key)) return;
+        labelSet.add(key);
+        normalizedColors.push({
+            id: option.id,
+            label,
+            imageUrl: option.imageUrl || '',
+            isActive: option.isActive !== false
+        });
+    });
+
+    normalizedColors.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase(), 'tr', { sensitivity: 'base' }));
+    colorOptionsList = normalizedColors;
+
+    const desiredSelection = (selectedLabels ?? Array.from(selectedColorLabels))
+        .map(label => label.trim())
+        .filter(Boolean);
+
+    selectedColorLabels.clear();
+    desiredSelection.forEach(label => selectedColorLabels.add(label));
+
+    select.innerHTML = '';
+
+    if (!normalizedColors.length) {
+        selectedColorLabels.clear();
+        select.disabled = true;
+        const placeholder = new Option('Renk bulunamadı', '', false, true);
+        placeholder.disabled = true;
+        select.appendChild(placeholder);
+        updateStockCodeFields();
+        renderSelectedColors();
+        return;
+    }
+
+    const query = (colorSelectSearchQuery || '').trim().toLocaleLowerCase('tr');
+    const filteredColors = query
+        ? normalizedColors.filter(color => color.label.toLocaleLowerCase('tr').includes(query))
+        : normalizedColors;
+
+    select.disabled = false;
+    const placeholderText = filteredColors.length ? 'Renk seçin...' : 'Eşleşme bulunamadı';
+    const placeholder = new Option(placeholderText, '', false, false);
+    placeholder.disabled = true;
+    if (!selectedColorLabels.size || !filteredColors.length) {
+        placeholder.selected = true;
+    }
+    select.appendChild(placeholder);
+
+    if (filteredColors.length) {
+        filteredColors.forEach(color => {
+            const option = new Option(
+                color.isActive ? color.label : `${color.label} (Pasif)`,
+                color.label,
+                false,
+                selectedColorLabels.has(color.label)
+            );
+            option.dataset.colorId = color.id ?? '';
+            option.dataset.imageUrl = color.imageUrl;
+            if (!color.isActive) {
+                option.classList.add('text-muted');
+            }
+            select.appendChild(option);
+        });
+    } else {
+        select.value = '';
+    }
+
+    renderSelectedColors();
+    updateStockCodeFields();
+}
+
+function renderSelectedSizes() {
+    const container = document.getElementById('selectedSizes');
+    if (!container) {
+        syncSelectedSizesInput();
+        return;
+    }
+
+    container.innerHTML = '';
+    container.classList.add('small');
+    if (!selectedSizeValues.size) {
+        container.textContent = 'Henüz beden seçilmedi.';
+        container.classList.add('text-muted');
+        syncSelectedSizesInput();
+        return;
+    }
+
+    container.classList.remove('text-muted');
+    Array.from(selectedSizeValues)
+        .sort(sizeComparator)
+        .forEach(size => {
+            const badge = document.createElement('span');
+            badge.className = 'selected-item';
+            badge.innerHTML = `
+                ${escapeHtml(size)}
+                <span class="remove-item" data-remove-size="${escapeHtml(size)}">&times;</span>
+            `;
+            container.appendChild(badge);
+        });
+    syncSelectedSizesInput();
+}
+
+function findColorOption(label) {
+    const key = normalizeLabelKey(label);
+    return colorOptionsList.find(color => normalizeLabelKey(color.label) === key) || null;
+}
+
+function renderSelectedColors() {
+    const container = document.getElementById('selectedColors');
+    if (!container) {
+        syncSelectedColorsInput();
+        return;
+    }
+
+    container.innerHTML = '';
+    container.classList.add('small');
+    if (!selectedColorLabels.size) {
+        container.textContent = 'Henüz renk seçilmedi.';
+        container.classList.add('text-muted');
+        syncSelectedColorsInput();
+        return;
+    }
+
+    container.classList.remove('text-muted');
+    Array.from(selectedColorLabels)
+        .map(label => label.trim())
+        .filter(Boolean)
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase(), 'tr', { sensitivity: 'base' }))
+        .forEach(label => {
+            const color = findColorOption(label);
+        const badge = document.createElement('span');
+            badge.className = 'selected-item';
+        badge.innerHTML = `
+                ${color?.imageUrl ? `<img src="${escapeHtml(color.imageUrl)}" alt="${escapeHtml(label)}">` : ''}
+                ${escapeHtml(label)}
+                ${color?.isActive === false ? '<span class="badge bg-secondary">Pasif</span>' : ''}
+                <span class="remove-item" data-remove-color="${escapeHtml(label)}">&times;</span>
+            `;
+        container.appendChild(badge);
+    });
+    syncSelectedColorsInput();
+}
+
+function clearSizeSelection() {
+    selectedSizeValues.clear();
+    const select = getSizeSelectElement();
+    if (select) {
+        select.selectedIndex = 0;
+    }
+    const searchInput = document.getElementById('sizeSelectSearch');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    sizeSelectSearchQuery = '';
+    setSizeOptions(sizeOptionsList);
+}
+
+function clearColorSelection() {
+    selectedColorLabels.clear();
+    const select = getColorSelectElement();
+    if (select) {
+        select.selectedIndex = 0;
+    }
+    const searchInput = document.getElementById('colorSelectSearch');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    colorSelectSearchQuery = '';
+    setColorOptions(colorOptionsList);
+}
+
+function applySelectedSizes(values = []) {
+    const normalizedValues = values
+        .map(value => String(value || '').trim())
+        .filter(Boolean);
+    sizeOptionsList = Array.from(new Set([...sizeOptionsList, ...normalizedValues]));
+    setSizeOptions(sizeOptionsList, normalizedValues);
+}
+
+function applySelectedColorsByLabels(labels = []) {
+    const normalizedLabels = labels
+        .map(label => String(label || '').trim())
+        .filter(Boolean);
+
+    const existingKeys = new Set(colorOptionsList.map(color => normalizeLabelKey(color.label)));
+    const augmentedOptions = [...colorOptionsList];
+
+    normalizedLabels.forEach(label => {
+        const key = normalizeLabelKey(label);
+        if (!existingKeys.has(key)) {
+            augmentedOptions.push({
+                id: null,
+                label,
+                imageUrl: '',
+                isActive: false
+            });
+            existingKeys.add(key);
+        }
+    });
+
+    setColorOptions(augmentedOptions, normalizedLabels);
+}
+
+function filterCategoryOptions(query = '', { preserveValue = true } = {}) {
+    const select = document.getElementById('kategoriSelect');
+    if (!select) return;
+
+    const normalizedQuery = query.trim().toLowerCase();
+    const currentValue = select.value;
+
+    select.innerHTML = '<option value="">Kategori seçin...</option>';
+
+    let hasSelectionOption = false;
+    categoriesList.forEach(option => {
+        const matches = !normalizedQuery || option.label.toLowerCase().includes(normalizedQuery);
+        const isSelected = option.value === currentValue;
+        if (matches || (preserveValue && isSelected)) {
+        const opt = document.createElement('option');
+        opt.value = option.value;
+        opt.textContent = option.label;
+            if (isSelected) {
+                opt.selected = true;
+                hasSelectionOption = true;
+            }
+        select.appendChild(opt);
+        }
+    });
+
+    if (preserveValue && currentValue && !hasSelectionOption) {
+        const original = categoriesList.find(option => option.value === currentValue);
+        if (original) {
+            const opt = document.createElement('option');
+            opt.value = original.value;
+            opt.textContent = original.label;
+            opt.selected = true;
+            select.appendChild(opt);
+        }
+    }
+}
+
+function setCategoryOptions(options = []) {
+    categoriesList = options;
+    const searchInput = document.getElementById('kategoriSelectSearch');
+    const query = searchInput ? searchInput.value : '';
+    filterCategoryOptions(query, { preserveValue: true });
+}
+
+function setCategoryValue(value) {
+    const select = document.getElementById('kategoriSelect');
+    if (!select) return;
+    if (!value) {
+        select.value = '';
+        return;
+    }
+    const exists = categoriesList.some(option => option.value === value);
+    if (!exists) return;
+    const searchInput = document.getElementById('kategoriSelectSearch');
+    const query = searchInput ? searchInput.value : '';
+    filterCategoryOptions(query, { preserveValue: true });
+        select.value = value;
+}
+
+function clearCategorySelection() {
+    const select = document.getElementById('kategoriSelect');
+    if (select) {
+        select.value = '';
+    }
+    const searchInput = document.getElementById('kategoriSelectSearch');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    filterCategoryOptions('', { preserveValue: false });
+}
+
+async function fetchJson(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`İstek başarısız: ${url}`);
+    return response.json();
+}
+
+async function initializeProductFormOptions() {
+    try {
+        const [categories, sizes, colors] = await Promise.all([
+            fetchJson('/api/categories?includeInactive=true'),
+            fetchJson('/api/size-guides'),
+            fetchJson('/api/colors?includeInactive=true')
+        ]);
+
+        const activeCategories = Array.isArray(categories)
+            ? categories.filter(cat => cat.isActive !== false)
+            : [];
+
+        const categoryOptions = [];
+        activeCategories.forEach(cat => {
+            if (!cat || !cat.name) return;
+            categoryOptions.push({ value: cat.name, label: cat.name });
+            if (Array.isArray(cat.subcategories) && cat.subcategories.length) {
+                cat.subcategories.forEach(sub => {
+                    const label = `${cat.name} > ${sub}`;
+                    categoryOptions.push({ value: label, label });
+                });
+            }
+        });
+        setCategoryOptions(categoryOptions);
+
+        const sizeValueSet = new Set();
+        if (Array.isArray(sizes)) {
+            sizes
+                .filter(size => size.isActive !== false)
+                .forEach(size => {
+                    if (size.name) {
+                        const normalizedName = String(size.name).trim();
+                        if (normalizedName) {
+                            sizeValueSet.add(normalizedName);
+                        }
+                    }
+                    if (Array.isArray(size.values?.sizes)) {
+                        size.values.sizes.forEach(value => {
+                            const normalized = String(value || '').trim();
+                            if (normalized) sizeValueSet.add(normalized);
+                        });
+                    } else if (Array.isArray(size.values)) {
+                        size.values.forEach(value => {
+                            if (typeof value === 'string') {
+                                const normalized = value.trim();
+                                if (normalized) sizeValueSet.add(normalized);
+                            } else if (value && typeof value === 'object') {
+                                const normalized = String(value.name ?? value.label ?? '').trim();
+                                if (normalized) sizeValueSet.add(normalized);
+                            }
+                        });
+                    }
+                });
+        }
+        setSizeOptions(Array.from(sizeValueSet));
+
+        const colorList = Array.isArray(colors) ? colors : [];
+        setColorOptions(colorList);
+
+        return {
+            categories: categoryOptions,
+            sizes: Array.from(sizeValueSet).sort(sizeComparator),
+            colors: colorList
+        };
+    } catch (error) {
+        console.error('Form seçenekleri yüklenirken hata:', error);
+        return { categories: [], sizes: [], colors: [] };
+    }
+}
+
+// Ürün kaydetme
+document.getElementById('saveProduct').addEventListener('click', function() {
+    if (editingProductId) {
+        updateProduct(editingProductId);
+        return;
+    }
+    const form = document.getElementById('productForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    restoreSelectionsFromInputs();
+
+    const renkListesi = getSelectedColorNames();
+    const renklerFromInput = parseArrayLike(data.renkler);
+    const finalColors = renkListesi.length ? renkListesi : renklerFromInput;
+    data.renkler = finalColors;
+
+    const stockData = buildStockCodeData(form);
+    data.urunKodu = stockData.primaryStockCode;
+    data.varyantlar = stockData.varyantlar;
+    data.renkKombinasyonlari = stockData.renkKombinasyonlari;
+    const bedenlerFromSelection = collectBedenlerFromForm();
+    const bedenlerFromInput = parseArrayLike(data.bedenler);
+    const finalSizes = bedenlerFromSelection.length ? bedenlerFromSelection : bedenlerFromInput;
+    const sanitizedSizes = (finalSizes.length ? finalSizes : stockData.bedenler).map(sanitizeSizeForStorage);
+    data.bedenler = sanitizedSizes.length ? sanitizedSizes : ['STD'];
+
+    data.oneCikan = form.querySelector('#oneCikan').checked;
+
+    if (!data.renkler.length) {
+        data.renkler = stockData.renkKombinasyonlari;
+    }
+
+    normalizeProductNumericFields(data);
+
+    console.log('Gönderilecek veri:', data);
+
+    fetch('/api/products', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(async response => {
+        const result = await response.json();
+        if (!response.ok) {
+            if (response.status === 400 && result.details?.includes('urunKodu must be unique')) {
+                alert('Bu ürün kodu zaten kullanılmış. Lütfen başka bir ürün kodu giriniz.');
+                return;
+            }
+            const detailText = Array.isArray(result.details)
+                ? result.details.join(' / ')
+                : (result.details || '');
+            const message = [result.error, detailText].filter(Boolean).join(' - ') || 'Bir hata oluştu';
+            throw new Error(message);
+        }
+        $('#addProductModal').modal('hide');
+        form.reset();
+        clearColorSelection();
+        clearSizeSelection();
+        clearCategorySelection();
+        loadProducts(1);
+        alert('Ürün başarıyla kaydedildi!');
+    })
+    .catch(error => {
+        console.error('Ürün kaydedilirken hata:', error);
+        alert('Ürün kaydedilirken bir hata oluştu: ' + error.message);
+    });
+});
+
+// Ürünleri yükle ve tabloya ekle
+async function loadProducts(page = productPagination.page) {
+            const tbody = document.getElementById('productTableBody');
+    if (!tbody) return;
+
+    const kategoriFilterSelect = document.getElementById('kategoriFilter');
+    if (kategoriFilterSelect) {
+        kategoriFilterValue = kategoriFilterSelect.value;
+    }
+
+    productPagination.page = Math.max(page, 1);
+                tbody.innerHTML = `
+                    <tr>
+            <td colspan="8" class="text-center text-muted py-4">
+                Yükleniyor...
+            </td>
+                    </tr>
+                `;
+
+    try {
+        const params = new URLSearchParams({
+            page: productPagination.page,
+            pageSize: productPagination.pageSize
+        });
+
+        const kategoriFilter = document.getElementById('kategoriFilter');
+        if (kategoriFilter && kategoriFilter.value) {
+            params.set('kategori', kategoriFilter.value);
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput && searchInput.value.trim()) {
+            params.set('search', searchInput.value.trim());
+        }
+
+        const response = await fetch(`/api/products?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error('Ürünler getirilemedi');
+        }
+
+        const data = await response.json();
+        console.log('Gelen ürünler:', data); // Debug
+
+        let products = [];
+
+        if (Array.isArray(data.items)) {
+            products = data.items;
+            productPagination.totalItems = data.totalItems ?? data.items.length;
+            productPagination.totalPages = Math.max(1, data.totalPages ?? Math.ceil(productPagination.totalItems / productPagination.pageSize));
+            productPagination.page = Math.min(data.currentPage ?? productPagination.page, productPagination.totalPages);
+            productPagination.pageSize = data.pageSize ?? productPagination.pageSize;
+        } else if (Array.isArray(data)) {
+            products = data;
+            productPagination.totalItems = products.length;
+            productPagination.totalPages = 1;
+            productPagination.page = 1;
+        } else {
+            products = [];
+            productPagination.totalItems = 0;
+            productPagination.totalPages = 1;
+            productPagination.page = 1;
+        }
+
+        if (!products.length && productPagination.totalItems > 0 && page > productPagination.page) {
+            await loadProducts(productPagination.page);
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!products.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">Henüz ürün bulunmamaktadır.</td>
+                </tr>
+            `;
+        } else {
+            products.forEach(product => {
+                const bedenlerText = Array.isArray(product.bedenler) ? product.bedenler.join(', ') : '';
+                const renklerText = Array.isArray(product.renkler)
+                    ? product.renkler.map(r => typeof r === 'object' ? r.name : r).join(', ')
+                    : '';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <span class="fw-medium">${product.urunKodu || ''}</span>
+                    </td>
+                    <td>${product.urunAdi || ''}</td>
+                    <td>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">
+                            ${product.kategori || ''}
+                        </span>
+                    </td>
+                    <td>₺${product.urunFiyati ? parseFloat(product.urunFiyati).toFixed(2) : '0.00'}</td>
+                    <td>₺${product.bayiFiyati ? parseFloat(product.bayiFiyati).toFixed(2) : '0.00'}</td>
+                    <td>
+                        <span class="badge ${getBadgeClass(product.stokSayisi)}">
+                            ${product.stokSayisi || 0}
+                        </span>
+                    </td>
+                    <td>
+                        ${product.oneCikan
+                            ? '<span class="badge bg-success">Öne Çıkan</span>'
+                            : '<span class="badge bg-secondary">Normal</span>'}
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-info" data-bs-toggle="tooltip" title="Detaylar"
+                                    onclick="showProductDetails(${product.id})">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="editProduct(${product.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const categories = [...new Set(products.map(p => p.kategori).filter(Boolean))];
+            setKategoriFilterOptions(categories);
+
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+    } catch (error) {
+            console.error('Ürünler yüklenirken hata:', error);
+            tbody.innerHTML = `
+                <tr>
+                <td colspan="8" class="text-center text-danger py-4">
+                    Ürünler yüklenirken bir hata oluştu. Lütfen yeniden deneyin.
+                    </td>
+                </tr>
+            `;
+        productPagination.totalItems = 0;
+        productPagination.totalPages = 1;
+        productPagination.page = 1;
+    } finally {
+        renderProductPagination();
+    }
+}
+
+// Stok durumuna göre badge class'ı belirle
+function getBadgeClass(stok) {
+    if (stok <= 0) return 'bg-danger';
+    if (stok <= 10) return 'bg-warning';
+    return 'bg-success';
+}
+
+// Ürün detaylarını göster
+function showProductDetails(productId) {
+    fetch(`/api/products/${productId}`)
+        .then(response => response.json())
+        .then(product => {
+            console.log('Detay verisi:', product); // Debug için
+
+            // Beden ve renk bilgilerini formatlama
+            let bedenlerText = '';
+            try {
+                if (typeof product.bedenler === 'string') {
+                    product.bedenler = JSON.parse(product.bedenler);
+                }
+                bedenlerText = Array.isArray(product.bedenler) ? product.bedenler.join(', ') : '';
+            } catch (e) {
+                console.error('Beden parse hatası:', e);
+                bedenlerText = 'Hata: Beden bilgisi okunamadı';
+            }
+
+            let renklerText = '';
+            try {
+                if (typeof product.renkler === 'string') {
+                    product.renkler = JSON.parse(product.renkler);
+                }
+                renklerText = Array.isArray(product.renkler) ? 
+                    product.renkler.map(r => {
+                        if (typeof r === 'object' && r !== null) {
+                            return `${r.name}${r.code ? ' (' + r.code + ')' : ''}`;
+                        }
+                        return r;
+                    }).join(', ') : '';
+            } catch (e) {
+                console.error('Renk parse hatası:', e);
+                renklerText = 'Hata: Renk bilgisi okunamadı';
+            }
+
+            const detailsHtml = `
+                <div class="modal fade" id="productDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ürün Detayları</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <dl class="row">
+                                            <dt class="col-sm-4">Ürün Kodu</dt>
+                                            <dd class="col-sm-8"><span class="badge bg-secondary">${product.urunKodu || ''}</span></dd>
+
+                                            <dt class="col-sm-4">Ürün Adı</dt>
+                                            <dd class="col-sm-8">${product.urunAdi || ''}</dd>
+
+                                            <dt class="col-sm-4">Kategori</dt>
+                                            <dd class="col-sm-8">
+                                                <span class="badge bg-primary">${product.kategori || ''}</span>
+                                            </dd>
+
+                                            <dt class="col-sm-4">Stok</dt>
+                                            <dd class="col-sm-8">
+                                                <span class="badge ${getBadgeClass(product.stokSayisi)}">
+                                                    ${product.stokSayisi || 0} adet
+                                                </span>
+                                            </dd>
+
+                                            <dt class="col-sm-4">Perakende Fiyat</dt>
+                                            <dd class="col-sm-8">₺${product.urunFiyati ? parseFloat(product.urunFiyati).toFixed(2) : '0.00'}</dd>
+
+                                            <dt class="col-sm-4">Bayi Fiyat</dt>
+                                            <dd class="col-sm-8">₺${product.bayiFiyati ? parseFloat(product.bayiFiyati).toFixed(2) : '0.00'}</dd>
+                                        </dl>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <dl class="row">
+                                            <dt class="col-sm-4">Bedenler</dt>
+                                            <dd class="col-sm-8">
+                                                ${bedenlerText ? bedenlerText.split(', ').map(beden => 
+                                                    `<span class="badge bg-info me-1">${beden}</span>`
+                                                ).join('') : '<span class="text-muted">Belirtilmemiş</span>'}
+                                            </dd>
+
+                                            <dt class="col-sm-4">Renkler</dt>
+                                            <dd class="col-sm-8">
+                                                ${renklerText ? renklerText.split(', ').map(renk => 
+                                                    `<span class="badge bg-secondary me-1">${renk}</span>`
+                                                ).join('') : '<span class="text-muted">Belirtilmemiş</span>'}
+                                            </dd>
+
+                                            <dt class="col-sm-4">Öne Çıkan</dt>
+                                            <dd class="col-sm-8">
+                                                ${product.oneCikan ? 
+                                                    '<span class="badge bg-success">Evet</span>' : 
+                                                    '<span class="badge bg-secondary">Hayır</span>'}
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <h6 class="mb-3">Açıklama</h6>
+                                    <p class="border rounded p-3 bg-light">
+                                        ${product.aciklama || '<span class="text-muted">Belirtilmemiş</span>'}
+                                    </p>
+                                </div>
+
+                                <div class="mt-4">
+                                    <h6 class="mb-3">Ürün Detayları</h6>
+                                    <p class="border rounded p-3 bg-light">
+                                        ${product.urunDetaylari ? product.urunDetaylari.split('\n').join('<br>') : 
+                                          '<span class="text-muted">Belirtilmemiş</span>'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Varsa eski modal'ı kaldır
+            const oldModal = document.getElementById('productDetailsModal');
+            if (oldModal) {
+                oldModal.remove();
+            }
+
+            // Yeni modal'ı ekle ve göster
+            document.body.insertAdjacentHTML('beforeend', detailsHtml);
+            const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+            modal.show();
+        })
+        .catch(error => console.error('Ürün detayları yüklenirken hata:', error));
+}
+
+// Ürün silme işlemi
+function deleteProduct(id) {
+    if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
+        fetch(`/api/products/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                loadProducts(productPagination.page);
+                alert('Ürün başarıyla silindi.');
+            }
+        })
+        .catch(error => {
+            console.error('Ürün silinirken hata:', error);
+            alert('Ürün silinirken bir hata oluştu.');
+        });
+    }
+}
+
+// Ürün düzenleme
+async function editProduct(productId) {
+    try {
+        await ensureOptionsReady();
+
+        const response = await fetch(`/api/products/${productId}`);
+        if (!response.ok) {
+            throw new Error('Ürün bilgileri alınamadı');
+        }
+        const product = await response.json();
+            console.log('Düzenlenecek ürün:', product);
+
+            document.getElementById('indirimContainer').style.display = 'block';
+
+            const form = document.getElementById('productForm');
+        if (!form) return;
+
+            form.querySelector('[name="urunAdi"]').value = product.urunAdi || '';
+            form.querySelector('[name="urunKodu"]').value = product.urunKodu || '';
+        setCategoryValue(product.kategori || '');
+            form.querySelector('[name="stokSayisi"]').value = product.stokSayisi || 0;
+            form.querySelector('[name="urunFiyati"]').value = product.urunFiyati || 0;
+            form.querySelector('[name="bayiFiyati"]').value = product.bayiFiyati || 0;
+            form.querySelector('[name="aciklama"]').value = product.aciklama || '';
+            form.querySelector('[name="urunDetaylari"]').value = product.urunDetaylari || '';
+        form.querySelector('#oneCikan').checked = !!product.oneCikan;
+
+        const bedenler = parseArrayLike(product.bedenler).map(value => String(value || '').trim()).filter(Boolean);
+        applySelectedSizes(bedenler);
+
+        const colorLabels = parseArrayLike(product.renkler).map(value => String(value || '').trim()).filter(Boolean);
+        applySelectedColorsByLabels(colorLabels);
+
+            updateStockCodeFields();
+
+        editingProductId = productId;
+
+            document.querySelector('#addProductModal .modal-title').textContent = 'Ürün Düzenle';
+
+            new bootstrap.Modal(document.getElementById('addProductModal')).show();
+    } catch (error) {
+            console.error('Ürün bilgileri yüklenirken hata:', error);
+            alert('Ürün bilgileri yüklenirken bir hata oluştu.');
+    }
+}
+
+// Ürün güncelleme
+function updateProduct(productId) {
+    const form = document.getElementById('productForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    restoreSelectionsFromInputs();
+
+    const renkListesi = getSelectedColorNames();
+    const renklerFromInput = parseArrayLike(data.renkler);
+    const finalColors = renkListesi.length ? renkListesi : renklerFromInput;
+    data.renkler = finalColors;
+    const stockData = buildStockCodeData(form);
+    data.urunKodu = stockData.primaryStockCode;
+    data.varyantlar = stockData.varyantlar;
+    data.renkKombinasyonlari = stockData.renkKombinasyonlari;
+    const bedenlerFromSelection = collectBedenlerFromForm();
+    const bedenlerFromInput = parseArrayLike(data.bedenler);
+    const finalSizes = bedenlerFromSelection.length ? bedenlerFromSelection : bedenlerFromInput;
+    const sanitizedSizes = (finalSizes.length ? finalSizes : stockData.bedenler).map(sanitizeSizeForStorage);
+    data.bedenler = sanitizedSizes.length ? sanitizedSizes : ['STD'];
+    data.oneCikan = form.querySelector('#oneCikan').checked;
+
+    if (!data.renkler.length) {
+        data.renkler = stockData.renkKombinasyonlari;
+    }
+
+    normalizeProductNumericFields(data);
+
+    console.log('Güncellenecek veri:', data);
+
+    fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(async response => {
+        const result = await response.json();
+        if (!response.ok) {
+            if (response.status === 400 && result.details?.includes('urunKodu must be unique')) {
+                alert('Bu ürün kodu zaten kullanılmış. Lütfen başka bir ürün kodu giriniz.');
+                return;
+            }
+            const detailText = Array.isArray(result.details)
+                ? result.details.join(' / ')
+                : (result.details || '');
+            const message = [result.error, detailText].filter(Boolean).join(' - ') || 'Bir hata oluştu';
+            throw new Error(message);
+        }
+        $('#addProductModal').modal('hide');
+        form.reset();
+        clearColorSelection();
+        clearSizeSelection();
+        clearCategorySelection();
+        loadProducts(productPagination.page);
+        alert('Ürün başarıyla güncellendi!');
+        editingProductId = null;
+
+        // Save butonunu eski haline getir
+        const saveButton = document.getElementById('saveProduct');
+        if (saveButton) {
+            saveButton.onclick = null;
+        }
+    })
+    .catch(error => {
+        console.error('Ürün güncellenirken hata:', error);
+        alert('Ürün güncellenirken bir hata oluştu: ' + error.message);
+    });
+}
+
+// Modal kapandığında formu sıfırla
+document.getElementById('addProductModal').addEventListener('hidden.bs.modal', function () {
+    const form = document.getElementById('productForm');
+    form.reset();
+    clearColorSelection();
+    clearSizeSelection();
+    clearCategorySelection();
+    
+    // İndirim alanını gizle
+    document.getElementById('indirimContainer').style.display = 'none';
+    
+    // Başlığı sıfırla
+    document.querySelector('#addProductModal .modal-title').textContent = 'Yeni Ürün Ekle';
+    
+    // Save butonunu sıfırla
+    const saveButton = document.getElementById('saveProduct');
+    if (saveButton) {
+        saveButton.onclick = null;
+    }
+    editingProductId = null;
+});
+
+document.getElementById('addProductModal').addEventListener('show.bs.modal', async () => {
+    await ensureOptionsReady();
+    const sizeSearchInput = document.getElementById('sizeSelectSearch');
+    if (sizeSearchInput) {
+        sizeSelectSearchQuery = '';
+        sizeSearchInput.value = '';
+    }
+    const colorSearchInput = document.getElementById('colorSelectSearch');
+    if (colorSearchInput) {
+        colorSelectSearchQuery = '';
+        colorSearchInput.value = '';
+    }
+    if (!editingProductId) {
+        clearColorSelection();
+        clearSizeSelection();
+        clearCategorySelection();
+        updateStockCodeFields();
+    } else {
+        setSizeOptions(sizeOptionsList, Array.from(selectedSizeValues));
+        setColorOptions(colorOptionsList, Array.from(selectedColorLabels));
+    }
+});
+
+// Sayfa yüklendiğinde ürünleri getir ve stok kodu önizlemesini hazırla
+document.addEventListener('DOMContentLoaded', () => {
+    ensureOptionsReady();
+    loadProducts();
+    updateStockCodeFields();
+
+    const form = document.getElementById('productForm');
+    if (!form) return;
+
+    const kategoriFilterElement = document.getElementById('kategoriFilter');
+    if (kategoriFilterElement) {
+        kategoriFilterElement.addEventListener('change', () => {
+            kategoriFilterValue = kategoriFilterElement.value;
+        });
+    }
+
+    const kategoriFilterSearchInput = document.getElementById('kategoriFilterSearch');
+    if (kategoriFilterSearchInput) {
+        kategoriFilterSearchInput.addEventListener('input', (event) => {
+            kategoriFilterSearchQuery = event.target.value || '';
+            renderKategoriFilterOptions();
+        });
+    }
+
+    const sizeSelectSearchInput = document.getElementById('sizeSelectSearch');
+    if (sizeSelectSearchInput) {
+        sizeSelectSearchInput.addEventListener('input', (event) => {
+            sizeSelectSearchQuery = event.target.value || '';
+            setSizeOptions(sizeOptionsList);
+        });
+    }
+
+    const sizeSelectElement = getSizeSelectElement();
+    if (sizeSelectElement) {
+        sizeSelectElement.addEventListener('change', (event) => {
+            const value = (event.target.value || '').trim();
+            if (!value) return;
+            addSizeValue(value);
+            event.target.selectedIndex = 0;
+        });
+    }
+
+    const colorSelectSearchInput = document.getElementById('colorSelectSearch');
+    if (colorSelectSearchInput) {
+        colorSelectSearchInput.addEventListener('input', (event) => {
+            colorSelectSearchQuery = event.target.value || '';
+            setColorOptions(colorOptionsList);
+        });
+    }
+
+    const colorSelectElement = getColorSelectElement();
+    if (colorSelectElement) {
+        colorSelectElement.addEventListener('change', (event) => {
+            const value = (event.target.value || '').trim();
+            if (!value) return;
+            addColorLabel(value);
+            event.target.selectedIndex = 0;
+        });
+    }
+
+    const urunAdiInput = form.querySelector('[name="urunAdi"]');
+    if (urunAdiInput) {
+        urunAdiInput.addEventListener('input', updateStockCodeFields);
+    }
+
+    const addSizeBtn = document.getElementById('addSizeBtn');
+    const kategoriSelectSearch = document.getElementById('kategoriSelectSearch');
+    if (addSizeBtn) {
+        addSizeBtn.addEventListener('click', () => {
+            const select = getSizeSelectElement();
+            if (!select) return;
+            const value = (select.value || '').trim();
+            if (!value) return;
+            addSizeValue(value);
+            select.selectedIndex = 0;
+        });
+    }
+
+    const selectedSizesContainer = document.getElementById('selectedSizes');
+    if (selectedSizesContainer) {
+        selectedSizesContainer.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('[data-remove-size]');
+            if (!removeButton) return;
+            const value = removeButton.dataset.removeSize;
+            if (!value) return;
+            if (selectedSizeValues.delete(value)) {
+                renderSelectedSizes();
+                updateStockCodeFields();
+            }
+        });
+    }
+
+    const addColorBtn = document.getElementById('addColorBtn');
+    if (addColorBtn) {
+        addColorBtn.addEventListener('click', () => {
+            const select = getColorSelectElement();
+            if (!select) return;
+            const value = (select.value || '').trim();
+            if (!value) return;
+            addColorLabel(value);
+            select.selectedIndex = 0;
+        });
+    }
+
+    const selectedColorsContainer = document.getElementById('selectedColors');
+    if (selectedColorsContainer) {
+        selectedColorsContainer.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('[data-remove-color]');
+            if (!removeButton) return;
+            const value = removeButton.dataset.removeColor;
+            if (!value) return;
+            if (selectedColorLabels.delete(value)) {
+                renderSelectedColors();
+                updateStockCodeFields();
+            }
+        });
+    }
+
+    if (productPageSizeSelect) {
+        productPageSizeSelect.addEventListener('change', () => {
+            const value = Number(productPageSizeSelect.value);
+            if (Number.isNaN(value) || value <= 0) return;
+            productPagination.pageSize = value;
+            productPagination.page = 1;
+            loadProducts(1);
+        });
+    }
+
+    if (productsPagination) {
+        productsPagination.addEventListener('click', (event) => {
+            const link = event.target.closest('a[data-page]');
+            if (!link) return;
+            event.preventDefault();
+            const targetPage = Number(link.dataset.page);
+            if (Number.isNaN(targetPage) || targetPage === productPagination.page) return;
+            loadProducts(targetPage);
+        });
+    }
+
+    if (kategoriSelectSearch) {
+        kategoriSelectSearch.addEventListener('input', (event) => {
+            filterCategoryOptions(event.target.value || '');
+        });
+    }
+
+    renderSelectedSizes();
+    renderSelectedColors();
+
+    ['bedenBaslangic', 'bedenBitis', 'bedenArtis'].forEach(name => {
+        const input = form.querySelector(`[name="${name}"]`);
+        if (input) {
+            input.addEventListener('input', updateStockCodeFields);
+        }
+    });
+
+    const comboTextarea = document.getElementById('renkKombinasyonlari');
+    if (comboTextarea) {
+        comboTextarea.addEventListener('input', updateStockCodeFields);
+    }
+});
+</script>

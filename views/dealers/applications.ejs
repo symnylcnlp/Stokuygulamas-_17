@@ -1,0 +1,426 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Bayi Başvuruları</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/dashboard">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="/dealers">Bayiler</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Bayi Başvuruları</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" id="refreshApplications">
+            <i class="bi bi-arrow-repeat me-1"></i> Yenile
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-muted small mb-1">Arama</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="applicationsSearchInput" placeholder="Firma adı / bayi kodu / yetkili">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">Durum</label>
+                <select class="form-select" id="applicationsStatusFilter">
+                    <option value="pending" selected>Beklemede</option>
+                    <option value="approved">Onaylı</option>
+                    <option value="rejected">Reddedildi</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">İl</label>
+                <input type="text" class="form-control" id="applicationsCityFilter" placeholder="Örn: İstanbul">
+            </div>
+            <div class="col-md-2 text-md-end">
+                <button class="btn btn-primary w-100 w-md-auto" id="applicationsApplyFilters">
+                    <i class="bi bi-funnel me-1"></i> Filtrele
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Applications Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>KOD</th>
+                        <th>FİRMA ADI</th>
+                        <th>YETKİLİ</th>
+                        <th>İLETİŞİM</th>
+                        <th>Durum</th>
+                        <th>Kuruluş Yılı</th>
+                        <th>Başvuru Tarihi</th>
+                        <th class="text-end">İŞLEMLER</th>
+                    </tr>
+                </thead>
+                <tbody id="applicationsTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">Kayıtlar yükleniyor...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="text-muted small" id="applicationsPaginationSummary">Toplam 0 kayıt</div>
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label text-muted small mb-0" for="applicationsPageSizeSelect">Sayfa başına</label>
+                    <select class="form-select form-select-sm w-auto" id="applicationsPageSizeSelect">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <nav aria-label="Bayi başvuruları sayfalama">
+                    <ul class="pagination pagination-sm mb-0" id="applicationsPagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Başvuru Detay Modal -->
+<div class="modal fade" id="applicationDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bayi Başvuru Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Firma Bilgileri</h6>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Firma Adı</dt>
+                            <dd class="col-sm-8" id="appDetailName"></dd>
+
+                            <dt class="col-sm-4">Vergi No</dt>
+                            <dd class="col-sm-8" id="appDetailTaxNumber"></dd>
+
+                            <dt class="col-sm-4">Vergi Dairesi</dt>
+                            <dd class="col-sm-8" id="appDetailTaxOffice"></dd>
+
+                            <dt class="col-sm-4">Kuruluş Yılı</dt>
+                            <dd class="col-sm-8" id="appDetailEstablishmentYear"></dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>İletişim Bilgileri</h6>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Yetkili</dt>
+                            <dd class="col-sm-8" id="appDetailContactName"></dd>
+
+                            <dt class="col-sm-4">Telefon</dt>
+                            <dd class="col-sm-8" id="appDetailContactPhone"></dd>
+
+                            <dt class="col-sm-4">E-posta</dt>
+                            <dd class="col-sm-8" id="appDetailContactEmail"></dd>
+
+                            <dt class="col-sm-4">Web Sitesi</dt>
+                            <dd class="col-sm-8"><a href="#" id="appDetailWebsite" target="_blank"></a></dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h6>Adres Bilgileri</h6>
+                        <p class="mb-1" id="appDetailAddress"></p>
+                        <p class="text-muted mb-0" id="appDetailLocation"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Belgeler</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li>Vergi Levhası: <span id="appDetailTaxCertificate"></span></li>
+                            <li>Ticaret Sicil Gazetesi: <span id="appDetailTradeRegistry"></span></li>
+                            <li>İmza Sirküleri: <span id="appDetailSignatureCircular"></span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" id="rejectApplicationBtn">Reddet</button>
+                <button type="button" class="btn btn-success" id="approveApplicationBtn">Onayla</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.getElementById('applicationsTableBody');
+    const pagination = document.getElementById('applicationsPagination');
+    const paginationSummary = document.getElementById('applicationsPaginationSummary');
+    const pageSizeSelect = document.getElementById('applicationsPageSizeSelect');
+    const searchInput = document.getElementById('applicationsSearchInput');
+    const statusFilter = document.getElementById('applicationsStatusFilter');
+    const cityFilter = document.getElementById('applicationsCityFilter');
+    const applyFiltersBtn = document.getElementById('applicationsApplyFilters');
+    const refreshBtn = document.getElementById('refreshApplications');
+
+    const state = {
+        page: 1,
+        pageSize: Number(pageSizeSelect.value) || 20,
+        totalPages: 1,
+        totalItems: 0,
+        filters: {
+            search: '',
+            status: 'pending',
+            city: ''
+        }
+    };
+
+    function formatStatus(status) {
+        switch (status) {
+            case 'approved':
+                return '<span class="badge bg-success">Onaylı</span>';
+            case 'rejected':
+                return '<span class="badge bg-danger">Reddedildi</span>';
+            default:
+                return '<span class="badge bg-warning text-dark">Beklemede</span>';
+        }
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '-';
+        return date.toLocaleString('tr-TR');
+    }
+
+    async function loadApplications(page = state.page) {
+        state.page = Math.max(page, 1);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">Yükleniyor...</td>
+            </tr>
+        `;
+
+        try {
+            const params = new URLSearchParams({ page: state.page.toString() });
+            params.append('pageSize', state.pageSize.toString());
+            params.append('includeOrdersSummary', 'true');
+            params.append('status', state.filters.status);
+            if (state.filters.search) params.append('search', state.filters.search);
+            if (state.filters.city) params.append('city', state.filters.city);
+
+            const response = await fetch(`/api/v1/dealers?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error('Bayi başvuruları alınamadı');
+            }
+
+            const result = await response.json();
+            const data = Array.isArray(result.data) ? result.data : [];
+
+            state.totalItems = result.meta?.totalItems ?? data.length;
+            state.totalPages = result.meta?.totalPages ?? 1;
+            state.page = result.meta?.page ?? state.page;
+            state.pageSize = result.meta?.pageSize ?? state.pageSize;
+
+            if (!data.length) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                    </tr>
+                `;
+                pagination.innerHTML = '';
+                paginationSummary.textContent = 'Kayıt bulunamadı.';
+                return;
+            }
+
+            tableBody.innerHTML = data.map(app => `
+                <tr>
+                    <td><code>${app.code}</code></td>
+                    <td>${app.name || '-'}</td>
+                    <td>${app.contactName || '-'}</td>
+                    <td>
+                        <div>${app.contactPhone || '-'}</div>
+                        <small class="text-muted">${app.contactEmail || ''}</small>
+                    </td>
+                    <td>${formatStatus(app.status)}</td>
+                    <td>${app.establishmentYear || '-'}</td>
+                    <td>${formatDate(app.createdAt)}</td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" data-code="${app.code}" data-action="detail">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${app.status !== 'approved' ? `<button class="btn btn-success" data-code="${app.code}" data-action="approve">Onayla</button>` : ''}
+                            ${app.status !== 'rejected' ? `<button class="btn btn-danger" data-action="reject" data-code="${app.code}">Reddet</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Sayfalama
+            pagination.innerHTML = '';
+            const pages = [];
+            for (let i = 1; i <= state.totalPages; i++) pages.push(i);
+            pages.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'page-item' + (p === state.page ? ' active' : '');
+                const a = document.createElement('a');
+                a.className = ' page-link';
+                a.href = '#';
+                a.dataset.page = String(p);
+                a.textContent = p;
+                li.appendChild(a);
+                pagination.appendChild(li);
+            });
+
+            const start = state.totalItems === 0 ? 0 : (state.page - 1) * state.pageSize + 1;
+            const end = state.totalItems === 0 ? 0 : Math.min(state.page * state.pageSize, state.totalItems);
+            paginationSummary.textContent = `${start}-${end} / ${state.totalItems} kayıt`;
+        } catch (error) {
+            console.error(error);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-danger py-4">
+                        Başvurular yüklenirken bir hata oluştu. Lütfen tekrar deneyin.
+                    </td>
+                </tr>
+            `;
+            pagination.innerHTML = '';
+            paginationSummary.textContent = 'Hata oluştu';
+        }
+    }
+
+    async function loadApplicationDetail(code) {
+        try {
+            const response = await fetch(`/api/v1/dealers/${encodeURIComponent(code)}`);
+            if (!response.ok) {
+                throw new Error('Bayi başvurusu alınamadı');
+            }
+            const result = await response.json();
+            const d = result.data;
+
+            document.getElementById('appDetailName').textContent = d.name || '-';
+            document.getElementById('appDetailTaxNumber').textContent = d.taxNumber || '-';
+            document.getElementById('appDetailTaxOffice').textContent = d.taxOffice || '-';
+            document.getElementById('appDetailEstablishmentYear').textContent = d.establishmentYear || '-';
+            document.getElementById('appDetailContactName').textContent = d.contactName || '-';
+            document.getElementById('appDetailContactPhone').textContent = d.contactPhone || '-';
+            document.getElementById('appDetailContactEmail').textContent = d.contactEmail || '-';
+            const websiteLink = document.getElementById('appDetailWebsite');
+            websiteLink.textContent = d.website || '-';
+            websiteLink.href = d.website || '#';
+            document.getElementById('appDetailAddress').textContent = d.address || '-';
+            document.getElementById('appDetailLocation').textContent =
+                [d.district, d.city, d.country].filter(Boolean).join(' / ') || '-';
+
+            const taxEl = document.getElementById('appDetailTaxCertificate');
+            const tradeEl = document.getElementById('appDetailTradeRegistry');
+            const signEl = document.getElementById('appDetailSignatureCircular');
+
+            taxEl.innerHTML = d.taxCertificatePath
+                ? `<a href="${d.taxCertificatePath}" target="_blank">Görüntüle</a>`
+                : '<span class="text-muted">Yüklenmemiş</span>';
+            tradeEl.innerHTML = d.tradeRegistryGazettePath
+                ? `<a href="${d.tradeRegistryGazettePath}" target="_blank">Görüntüle</a>`
+                : '<span class="text-muted">Yüklenmemiş</span>';
+            signEl.innerHTML = d.signatureCircularPath
+                ? `<a href="${d.signatureCircularPath}" target="_blank">Görüntüle</a>`
+                : '<span class="text-muted">Yüklenmemiş</span>';
+
+            document.getElementById('approveApplicationBtn').dataset.code = d.code;
+            document.getElementById('rejectApplicationBtn').dataset.code = d.code;
+
+            const modal = new bootstrap.Modal(document.getElementById('applicationDetailModal'));
+            modal.show();
+        } catch (error) {
+            console.error(error);
+            alert('Başvuru detayları alınırken bir hata oluştu.');
+        }
+    }
+
+    async function updateApplicationStatus(code, status) {
+        try {
+            const response = await fetch(`/api/v1/dealers/${encodeURIComponent(code)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status,
+                    isActive: status === 'approved'
+                })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const msg = Array.isArray(result.details)
+                    ? result.details.join(' / ')
+                    : (result.error || 'İşlem sırasında bir hata oluştu');
+                throw new Error(msg);
+            }
+            alert(status === 'approved' ? 'Başvuru onaylandı.' : 'Başvuru reddedildi.');
+            const modalEl = document.getElementById('applicationDetailModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            await loadApplications();
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'İşlem sırasında bir hata oluştu.');
+        }
+    }
+
+    // Event handlers
+    document.getElementById('applicationsPageSizeSelect').addEventListener('change', (e) => {
+        state.pageSize = Number(e.target.value) || 20;
+        state.page = 1;
+        loadApplications(1);
+    });
+
+    document.getElementById('applicationsTableBody').addEventListener('click', (event) => {
+        const btn = event.target.closest('button');
+        if (!btn) return;
+        const code = btn.dataset.code;
+        const action = btn.dataset.action;
+
+        if (!code) return;
+
+        if (action === 'detail') {
+            loadApplicationDetail(code);
+        } else if (action === 'approve') {
+            updateApplicationStatus(code, 'approved');
+        } else if (action === 'reject') {
+            updateApplicationStatus(code, 'rejected');
+        }
+    });
+
+    document.getElementById('applicationsApplyFilters').addEventListener('click', () => {
+        state.filters = {
+            search: searchInput.value.trim(),
+            status: statusFilter.value || 'pending',
+            city: cityFilter.value.trim()
+        };
+        state.page = 1;
+        loadApplications(1);
+    });
+
+    document.getElementById('refreshApplications').addEventListener('click', () => {
+        state.page = 1;
+        loadApplications(1);
+    });
+
+    // İlk yükleme
+    loadApplications();
+});
+</script>
+
+

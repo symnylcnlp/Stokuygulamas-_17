@@ -1,0 +1,213 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Dashboard</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <button class="btn btn-primary d-flex align-items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>Yeni Ürün</span>
+        </button>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <!-- Toplam Ürün -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="stat-title">TOPLAM ÜRÜN</div>
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="d-flex align-items-center text-success">
+                    <i class="bi bi-arrow-up-short"></i>
+                    <span>12% artış</span>
+                </div>
+                <i class="bi bi-box stat-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stokta Olmayan -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="stat-title">STOKTA OLMAYAN</div>
+                <div class="stat-value text-danger" id="outOfStock">0</div>
+                <div class="d-flex align-items-center text-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Acil sipariş gerekli</span>
+                </div>
+                <i class="bi bi-x-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Düşük Stok -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="stat-title">DÜŞÜK STOK</div>
+                <div class="stat-value text-warning" id="lowStock">0</div>
+                <div class="d-flex align-items-center text-warning">
+                    <i class="bi bi-arrow-down-short"></i>
+                    <span>Stok takibi gerekli</span>
+                </div>
+                <i class="bi bi-graph-down stat-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toplam Kategori -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="stat-title">TOPLAM KATEGORİ</div>
+                <div class="stat-value" id="totalCategories">0</div>
+                <div class="d-flex align-items-center">
+                    <span>Aktif kategoriler</span>
+                </div>
+                <i class="bi bi-tags stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row -->
+<div class="row g-4">
+    <!-- Düşük Stok Uyarıları -->
+    <div class="col-12 col-xl-8">
+        <div class="card h-100">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Düşük Stok Uyarıları</h5>
+                <div class="dropdown">
+                    <button class="btn" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Tümünü Göster</a></li>
+                        <li><a class="dropdown-item" href="#">Rapor Oluştur</a></li>
+                        <li><a class="dropdown-item" href="#">Excel'e Aktar</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ÜRÜN KODU</th>
+                                <th>ÜRÜN ADI</th>
+                                <th>KATEGORİ</th>
+                                <th>STOK</th>
+                                <th>İŞLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowStockTable">
+                            <!-- JavaScript ile doldurulacak -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kategori Dağılımı -->
+    <div class="col-12 col-xl-4">
+        <div class="card h-100">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Kategori Dağılımı</h5>
+            </div>
+            <div class="card-body">
+                <div id="categoryDistribution">
+                    <!-- JavaScript ile doldurulacak -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// İstatistikleri yükle
+function loadStats() {
+    fetch('/api/products')
+        .then(response => response.json())
+        .then(products => {
+            // Temel istatistikler
+            document.getElementById('totalProducts').textContent = products.length;
+            document.getElementById('outOfStock').textContent = products.filter(p => p.stock === 0).length;
+            document.getElementById('lowStock').textContent = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+            
+            // Benzersiz kategorileri say
+            const categories = new Set(products.map(p => p.category));
+            document.getElementById('totalCategories').textContent = categories.size;
+            
+            // Düşük stok tablosunu doldur
+            const lowStockProducts = products.filter(p => p.stock > 0 && p.stock <= 10);
+            const tbody = document.getElementById('lowStockTable');
+            tbody.innerHTML = '';
+            
+            lowStockProducts.forEach(product => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <span class="fw-medium">${product.productCode}</span>
+                    </td>
+                    <td>${product.productName}</td>
+                    <td>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">
+                            ${product.category}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning bg-opacity-10 text-warning">
+                            ${product.stock} adet
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary update-stock" data-id="${product.id}">
+                            <i class="bi bi-plus-lg"></i> Stok Ekle
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Kategori dağılımını göster
+            const categoryStats = {};
+            products.forEach(product => {
+                categoryStats[product.category] = (categoryStats[product.category] || 0) + 1;
+            });
+
+            const categoryList = document.getElementById('categoryDistribution');
+            categoryList.innerHTML = '';
+            
+            Object.entries(categoryStats).forEach(([category, count]) => {
+                const percentage = (count / products.length * 100).toFixed(1);
+                categoryList.innerHTML += `
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-medium">${category}</span>
+                            <span class="text-muted">${percentage}%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: ${percentage}%; background-color: var(--primary-color);">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        })
+        .catch(error => console.error('İstatistikler yüklenirken hata:', error));
+}
+
+// Sayfa yüklendiğinde istatistikleri getir
+document.addEventListener('DOMContentLoaded', loadStats);
+</script>

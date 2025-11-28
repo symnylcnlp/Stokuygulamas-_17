@@ -1,0 +1,631 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Sipariş Yönetimi</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/dashboard">Ana Sayfa</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Siparişler</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" id="refreshOrders">
+            <i class="bi bi-arrow-repeat me-1"></i> Yenile
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">Arama</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="ordersSearchInput" placeholder="Sipariş no / bayi adı / kodu">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">Durum</label>
+                <select class="form-select" id="ordersStatusFilter">
+                    <option value="">Tümü</option>
+                    <option value="pending">Beklemede</option>
+                    <option value="approved">Onaylandı</option>
+                    <option value="preparing">Hazırlanıyor</option>
+                    <option value="shipped">Kargolandı</option>
+                    <option value="completed">Tamamlandı</option>
+                    <option value="cancelled">İptal Edildi</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-muted small mb-1">Bayi Kodu</label>
+                <input type="text" class="form-control" id="ordersDealerFilter" placeholder="Örn: BAYI-001">
+            </div>
+            <div class="col-md-3 text-md-end">
+                <button class="btn btn-primary w-100 w-md-auto" id="ordersApplyFilters">
+                    <i class="bi bi-funnel me-1"></i> Filtrele
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>SİPARİŞ NO</th>
+                        <th>BAYİ</th>
+                        <th>İLETİŞİM</th>
+                        <th>TUTAR</th>
+                        <th>ADET</th>
+                        <th>DURUM</th>
+                        <th>OLUŞTURMA</th>
+                        <th class="text-end">İŞLEMLER</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            Kayıtlar yükleniyor...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="text-muted small" id="ordersPaginationSummary">Toplam 0 kayıt</div>
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label text-muted small mb-0" for="ordersPageSizeSelect">Sayfa başına</label>
+                    <select class="form-select form-select-sm w-auto" id="ordersPageSizeSelect">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <nav aria-label="Siparişler sayfalama">
+                    <ul class="pagination pagination-sm mb-0" id="ordersPagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sipariş Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="text-muted small d-block">Sipariş Numarası</span>
+                        <h6 id="modalOrderNumber" class="mb-0"></h6>
+                    </div>
+                    <span id="modalOrderStatusBadge" class="badge bg-secondary"></span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted small mb-2">Bayi Bilgileri</h6>
+                            <p class="mb-1"><strong id="modalDealerName">-</strong></p>
+                            <p class="mb-0 text-muted small">
+                                Kod: <span id="modalDealerCode">-</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="text-muted small mb-2">İletişim</h6>
+                            <p class="mb-1" id="modalContactName">-</p>
+                            <p class="mb-0 text-muted small">
+                                <span id="modalContactEmail">-</span> ·
+                                <span id="modalContactPhone">-</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border rounded p-3 mb-4">
+                    <div class="d-flex flex-wrap gap-3">
+                        <div>
+                            <span class="text-muted small d-block">Toplam Adet</span>
+                            <strong id="modalTotalQuantity">0</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Toplam Tutar</span>
+                            <strong id="modalTotalAmount">₺0,00</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Para Birimi</span>
+                            <strong id="modalCurrency">TRY</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Oluşturma</span>
+                            <strong id="modalCreatedAt">-</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Güncelleme</span>
+                            <strong id="modalUpdatedAt">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Sipariş Kalemleri</h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>KOD</th>
+                                    <th>ÜRÜN</th>
+                                    <th class="text-center">ADET</th>
+                                    <th class="text-end">BİRİM</th>
+                                    <th class="text-end">TUTAR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalOrderItems">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">Kalem bulunamadı.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Durum Güncelle</label>
+                    <div class="input-group">
+                        <select class="form-select" id="modalStatusSelect">
+                            <option value="pending">Beklemede</option>
+                            <option value="approved">Onaylandı</option>
+                            <option value="preparing">Hazırlanıyor</option>
+                            <option value="shipped">Kargolandı</option>
+                            <option value="completed">Tamamlandı</option>
+                            <option value="cancelled">İptal Edildi</option>
+                        </select>
+                        <button class="btn btn-primary" id="modalUpdateStatusBtn">
+                            <i class="bi bi-arrow-repeat me-1"></i> Güncelle
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label text-muted small">Notlar</label>
+                    <p id="modalNotes" class="mb-0 text-break">-</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger me-auto" id="modalDeleteOrderBtn">
+                    <i class="bi bi-trash me-1"></i> Siparişi Sil
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ordersTableBody = document.getElementById('ordersTableBody');
+    const ordersPagination = document.getElementById('ordersPagination');
+    const ordersPaginationSummary = document.getElementById('ordersPaginationSummary');
+    const ordersPageSizeSelect = document.getElementById('ordersPageSizeSelect');
+    const ordersSearchInput = document.getElementById('ordersSearchInput');
+    const ordersStatusFilter = document.getElementById('ordersStatusFilter');
+    const ordersDealerFilter = document.getElementById('ordersDealerFilter');
+    const ordersApplyFilters = document.getElementById('ordersApplyFilters');
+    const refreshOrdersBtn = document.getElementById('refreshOrders');
+
+    const orderDetailsModalEl = document.getElementById('orderDetailsModal');
+    const orderDetailsModal = new bootstrap.Modal(orderDetailsModalEl);
+    const modalOrderNumber = document.getElementById('modalOrderNumber');
+    const modalOrderStatusBadge = document.getElementById('modalOrderStatusBadge');
+    const modalDealerName = document.getElementById('modalDealerName');
+    const modalDealerCode = document.getElementById('modalDealerCode');
+    const modalContactName = document.getElementById('modalContactName');
+    const modalContactEmail = document.getElementById('modalContactEmail');
+    const modalContactPhone = document.getElementById('modalContactPhone');
+    const modalTotalQuantity = document.getElementById('modalTotalQuantity');
+    const modalTotalAmount = document.getElementById('modalTotalAmount');
+    const modalCurrency = document.getElementById('modalCurrency');
+    const modalCreatedAt = document.getElementById('modalCreatedAt');
+    const modalUpdatedAt = document.getElementById('modalUpdatedAt');
+    const modalNotes = document.getElementById('modalNotes');
+    const modalOrderItems = document.getElementById('modalOrderItems');
+    const modalStatusSelect = document.getElementById('modalStatusSelect');
+    const modalUpdateStatusBtn = document.getElementById('modalUpdateStatusBtn');
+    const modalDeleteOrderBtn = document.getElementById('modalDeleteOrderBtn');
+
+    const ORDER_STATUSES = {
+        pending: { label: 'Beklemede', badge: 'badge bg-warning text-dark' },
+        approved: { label: 'Onaylandı', badge: 'badge bg-primary' },
+        preparing: { label: 'Hazırlanıyor', badge: 'badge bg-info text-dark' },
+        shipped: { label: 'Kargolandı', badge: 'badge bg-secondary' },
+        completed: { label: 'Tamamlandı', badge: 'badge bg-success' },
+        cancelled: { label: 'İptal Edildi', badge: 'badge bg-danger' }
+    };
+
+    const ordersState = {
+        page: 1,
+        pageSize: Number(ordersPageSizeSelect.value) || 20,
+        totalPages: 1,
+        totalItems: 0,
+        currentFilters: {
+            search: '',
+            status: '',
+            dealerCode: ''
+        }
+    };
+
+    let selectedOrderNumber = null;
+
+    function formatDate(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '-';
+        return date.toLocaleString('tr-TR');
+    }
+
+    function formatCurrency(amount, currency = 'TRY') {
+        if (amount === null || amount === undefined) return '-';
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: currency || 'TRY'
+        }).format(Number(amount) || 0);
+    }
+
+    function renderStatusBadge(status) {
+        const meta = ORDER_STATUSES[status] || { label: status || '-', badge: 'badge bg-secondary' };
+        return `<span class="${meta.badge}">${meta.label}</span>`;
+    }
+
+    function renderOrdersTable(orders = []) {
+        if (!orders.length) {
+            ordersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        Kayıt bulunamadı.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        ordersTableBody.innerHTML = orders.map(order => `
+            <tr>
+                <td>
+                    <span class="fw-semibold">${order.orderNumber}</span>
+                </td>
+                <td>
+                    <div>${order.dealerName || '-'}</div>
+                    <small class="text-muted">${order.dealerCode || '-'}</small>
+                </td>
+                <td>
+                    <div>${order.contactName || '-'}</div>
+                    <small class="text-muted">${order.contactEmail || ''}${order.contactPhone ? ' · ' + order.contactPhone : ''}</small>
+                </td>
+                <td>
+                    <span class="fw-medium">${formatCurrency(order.totalAmount, order.currency)}</span>
+                </td>
+                <td>
+                    <span class="badge bg-light text-dark">${order.totalQuantity || 0}</span>
+                </td>
+                <td>${renderStatusBadge(order.status)}</td>
+                <td>
+                    <small class="text-muted">${formatDate(order.createdAt)}</small>
+                </td>
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" data-order-number="${order.orderNumber}" data-action="details">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" data-order-number="${order.orderNumber}" data-action="delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function renderPagination() {
+        const { page, totalPages } = ordersState;
+        ordersPagination.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const createPageItem = (targetPage, label, { disabled = false, active = false } = {}) => {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            if (disabled) li.classList.add('disabled');
+            if (active) li.classList.add('active');
+
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.dataset.page = String(targetPage);
+            a.textContent = label;
+
+            li.appendChild(a);
+            ordersPagination.appendChild(li);
+        };
+
+        createPageItem(Math.max(1, page - 1), 'Önceki', { disabled: page === 1 });
+
+        const visiblePages = new Set([1, totalPages, page, page - 1, page + 1]);
+        if (page - 2 > 1) visiblePages.add(page - 2);
+        if (page + 2 < totalPages) visiblePages.add(page + 2);
+
+        const sortedPages = Array.from(visiblePages)
+            .filter(p => p >= 1 && p <= totalPages)
+            .sort((a, b) => a - b);
+
+        let lastPage = 0;
+        sortedPages.forEach(p => {
+            if (lastPage && p - lastPage > 1) {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = '<span class="page-link">...</span>';
+                ordersPagination.appendChild(li);
+            }
+            createPageItem(p, String(p), { active: p === page });
+            lastPage = p;
+        });
+
+        createPageItem(Math.min(totalPages, page + 1), 'Sonraki', { disabled: page === totalPages });
+    }
+
+    function updateSummary() {
+        const { page, pageSize, totalItems } = ordersState;
+        const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+        const end = totalItems === 0 ? 0 : Math.min(page * pageSize, totalItems);
+        ordersPaginationSummary.textContent = totalItems
+            ? `${start}-${end} / ${totalItems} kayıt`
+            : 'Kayıt bulunamadı.';
+    }
+
+    async function loadOrders(page = ordersState.page) {
+        ordersState.page = Math.max(page, 1);
+        ordersTableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">Yükleniyor...</td>
+            </tr>
+        `;
+
+        try {
+            const params = new URLSearchParams({
+                page: ordersState.page,
+                pageSize: ordersState.pageSize
+            });
+
+            const { search, status, dealerCode } = ordersState.currentFilters;
+            if (search) params.set('search', search);
+            if (status) params.set('status', status);
+            if (dealerCode) params.set('dealerCode', dealerCode);
+
+            const response = await fetch(`/api/v1/orders?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error('Siparişler alınamadı');
+            }
+
+            const result = await response.json();
+            const data = Array.isArray(result.data) ? result.data : [];
+
+            ordersState.totalItems = result.meta?.totalItems ?? data.length;
+            ordersState.totalPages = result.meta?.totalPages ?? 1;
+            ordersState.page = result.meta?.page ?? ordersState.page;
+            ordersState.pageSize = result.meta?.pageSize ?? ordersState.pageSize;
+
+            renderOrdersTable(data);
+            renderPagination();
+            updateSummary();
+        } catch (error) {
+            console.error(error);
+            ordersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-danger py-4">
+                        Siparişler alınırken bir hata oluştu. Lütfen tekrar deneyin.
+                    </td>
+                </tr>
+            `;
+            ordersState.totalItems = 0;
+            ordersState.totalPages = 1;
+            ordersState.page = 1;
+            updateSummary();
+        }
+    }
+
+    async function openOrderDetails(orderNumber) {
+        try {
+            const response = await fetch(`/api/v1/orders/${encodeURIComponent(orderNumber)}`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert('Sipariş bulunamadı.');
+                    return;
+                }
+                throw new Error('Sipariş detayları alınamadı');
+            }
+
+            const result = await response.json();
+            const order = result.data;
+            selectedOrderNumber = order.orderNumber;
+
+            modalOrderNumber.textContent = order.orderNumber;
+            modalOrderStatusBadge.className = '';
+            modalOrderStatusBadge.className = ORDER_STATUSES[order.status]?.badge || 'badge bg-secondary';
+            modalOrderStatusBadge.textContent = ORDER_STATUSES[order.status]?.label || order.status || '-';
+
+            modalDealerName.textContent = order.dealerName || '-';
+            modalDealerCode.textContent = order.dealerCode || '-';
+            modalContactName.textContent = order.contactName || '-';
+            modalContactEmail.textContent = order.contactEmail || '-';
+            modalContactPhone.textContent = order.contactPhone || '-';
+            modalTotalQuantity.textContent = order.totalQuantity || 0;
+            modalTotalAmount.textContent = formatCurrency(order.totalAmount, order.currency);
+            modalCurrency.textContent = order.currency || 'TRY';
+            modalCreatedAt.textContent = formatDate(order.createdAt);
+            modalUpdatedAt.textContent = formatDate(order.updatedAt);
+            modalNotes.textContent = order.notes || '-';
+
+            modalStatusSelect.value = order.status || 'pending';
+
+            if (Array.isArray(order.items) && order.items.length) {
+                modalOrderItems.innerHTML = order.items.map(item => `
+                    <tr>
+                        <td><code>${item.productCode || '-'}</code></td>
+                        <td>
+                            <div>${item.productName || '-'}</div>
+                            <small class="text-muted">
+                                ${item.requested?.size || '-'} · ${item.requested?.color || '-'}
+                            </small>
+                        </td>
+                        <td class="text-center">${item.quantity || 0}</td>
+                        <td class="text-end">${formatCurrency(item.unitPrice, order.currency)}</td>
+                        <td class="text-end">${formatCurrency(item.subtotal, order.currency)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                modalOrderItems.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">Kalem bulunamadı.</td>
+                    </tr>
+                `;
+            }
+
+            orderDetailsModal.show();
+        } catch (error) {
+            console.error(error);
+            alert('Sipariş detayları yüklenirken bir hata oluştu.');
+        }
+    }
+
+    async function updateOrderStatus(orderNumber, status) {
+        if (!orderNumber || !status) return;
+        try {
+            const response = await fetch(`/api/v1/orders/${encodeURIComponent(orderNumber)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                throw new Error(result.details?.join(' / ') || result.error || 'Durum güncellenemedi');
+            }
+
+            await loadOrders();
+            await openOrderDetails(orderNumber);
+            alert('Sipariş durumu güncellendi.');
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Durum güncellenirken hata oluştu.');
+        }
+    }
+
+    async function deleteOrder(orderNumber) {
+        if (!orderNumber) return;
+        const confirmed = confirm('Bu siparişi silmek istediğinize emin misiniz? İşlem geri alınamaz.');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`/api/v1/orders/${encodeURIComponent(orderNumber)}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                throw new Error(result.error || 'Sipariş silinemedi');
+            }
+
+            orderDetailsModal.hide();
+            selectedOrderNumber = null;
+            await loadOrders();
+            alert('Sipariş silindi.');
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Sipariş silinirken hata oluştu.');
+        }
+    }
+
+    ordersPageSizeSelect.addEventListener('change', () => {
+        const value = Number(ordersPageSizeSelect.value);
+        if (Number.isNaN(value) || value <= 0) return;
+        ordersState.pageSize = value;
+        ordersState.page = 1;
+        loadOrders(1);
+    });
+
+    if (ordersPagination) {
+        ordersPagination.addEventListener('click', event => {
+            const link = event.target.closest('a[data-page]');
+            if (!link) return;
+            event.preventDefault();
+            const targetPage = Number(link.dataset.page);
+            if (Number.isNaN(targetPage) || targetPage === ordersState.page) return;
+            loadOrders(targetPage);
+        });
+    }
+
+    ordersApplyFilters.addEventListener('click', () => {
+        ordersState.currentFilters = {
+            search: ordersSearchInput.value.trim(),
+            status: ordersStatusFilter.value,
+            dealerCode: ordersDealerFilter.value.trim()
+        };
+        ordersState.page = 1;
+        loadOrders(1);
+    });
+
+    refreshOrdersBtn.addEventListener('click', () => {
+        loadOrders();
+    });
+
+    ordersTableBody.addEventListener('click', event => {
+        const button = event.target.closest('button[data-order-number]');
+        if (!button) return;
+        const orderNumber = button.dataset.orderNumber;
+        const action = button.dataset.action;
+        if (action === 'details') {
+            openOrderDetails(orderNumber);
+        } else if (action === 'delete') {
+            deleteOrder(orderNumber);
+        }
+    });
+
+    modalUpdateStatusBtn.addEventListener('click', () => {
+        const status = modalStatusSelect.value;
+        if (!selectedOrderNumber) return;
+        updateOrderStatus(selectedOrderNumber, status);
+    });
+
+    modalDeleteOrderBtn.addEventListener('click', () => {
+        if (!selectedOrderNumber) return;
+        deleteOrder(selectedOrderNumber);
+    });
+
+    orderDetailsModalEl.addEventListener('hidden.bs.modal', () => {
+        selectedOrderNumber = null;
+    });
+
+    loadOrders();
+});
+</script>
+

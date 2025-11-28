@@ -1,0 +1,337 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Beden Listesi Yönetimi</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/dashboard">Ana Sayfa</a></li>
+                <li class="breadcrumb-item active">Bedenler</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" id="refreshGuides">
+            <i class="bi bi-arrow-repeat me-1"></i> Yenile
+        </button>
+        <button class="btn btn-primary" id="addGuideBtn">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Beden
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white border-0 pb-0">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <label class="form-label text-muted small mb-1">Arama</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="guideSearch" placeholder="Beden değeri...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check form-switch mt-4 pt-1">
+                    <input class="form-check-input" type="checkbox" id="includeInactiveGuides">
+                    <label class="form-check-label" for="includeInactiveGuides">Sadece pasif kayıtları göster</label>
+                </div>
+            </div>
+            <div class="col-md-3 text-md-end">
+                <span class="text-muted small">Toplam <span class="fw-semibold" id="guideCount">0</span> kayıt</span>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="guidesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Beden / Değer</th>
+                        <th>Durum</th>
+                        <th class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">Beden kayıtları yükleniyor...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="guideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Beden Kaydı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="guideForm">
+                <div class="mb-3">
+                    <label class="form-label">Beden / Değer</label>
+                    <input type="text" class="form-control" name="value" placeholder="Örn: S, M, 115cm, 45+10L" required>
+                    <div class="form-text">Her kayıt tek bir değer içerir.</div>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" name="isActive" checked>
+                    <label class="form-check-label">Aktif</label>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" id="saveGuideBtn">
+                    <i class="bi bi-save me-1"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof bootstrap === 'undefined') return;
+
+    const tableBody = document.querySelector('#guidesTable tbody');
+    const guideCountEl = document.getElementById('guideCount');
+    const searchInput = document.getElementById('guideSearch');
+    const includeInactiveSwitch = document.getElementById('includeInactiveGuides');
+    const refreshBtn = document.getElementById('refreshGuides');
+    const addBtn = document.getElementById('addGuideBtn');
+    const saveBtn = document.getElementById('saveGuideBtn');
+    const modal = new bootstrap.Modal(document.getElementById('guideModal'));
+    const form = document.getElementById('guideForm');
+    const valueInput = form.querySelector('[name="value"]');
+    const activeInput = form.querySelector('[name="isActive"]');
+
+    let guides = [];
+    let currentId = null;
+
+    function showAlert(message, type = 'success') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.role = 'alert';
+        alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        document.querySelector('.main-content').prepend(alert);
+        setTimeout(() => alert.remove(), 4000);
+    }
+
+    function resolveValue(record) {
+        if (!record) return '';
+        if (typeof record.value === 'string') return record.value;
+        if (typeof record.name === 'string') return record.name;
+        return '';
+    }
+
+    function escapeHtml(text) {
+        return String(text ?? '').replace(/[&<>"']/g, (char) => {
+            switch (char) {
+                case '&': return '&amp;';
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '"': return '&quot;';
+                case '\'': return '&#39;';
+                default: return char;
+            }
+        });
+    }
+
+    function renderTable() {
+        const query = searchInput.value.trim().toLowerCase();
+        const showInactiveOnly = includeInactiveSwitch.checked;
+        const filtered = guides.filter(item => {
+            if (showInactiveOnly) {
+                if (item.isActive) return false;
+            } else if (!item.isActive) {
+                return false;
+            }
+            const value = resolveValue(item);
+            if (!query) return true;
+            return value.toLowerCase().includes(query);
+        });
+
+        guideCountEl.textContent = filtered.length.toString();
+
+        if (!filtered.length) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">Beden kaydı bulunamadı.</td></tr>';
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(item => {
+            const value = resolveValue(item);
+            const displayValue = value
+                ? `<div class="fw-semibold">${escapeHtml(value)}</div>`
+                : '<span class="text-muted">-</span>';
+            const statusClass = item.isActive ? 'badge bg-success bg-opacity-10 text-success' : 'badge bg-secondary';
+            const statusText = item.isActive ? 'Aktif' : 'Pasif';
+            return `
+                <tr data-id="${item.id}">
+                    <td>${displayValue}</td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" data-action="edit"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-outline-secondary" data-action="toggle"><i class="bi ${item.isActive ? 'bi-pause-circle' : 'bi-play-circle'}"></i></button>
+                            <button class="btn btn-outline-danger" data-action="delete"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function loadGuides() {
+        try {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">Yükleniyor...</td></tr>';
+            const res = await fetch('/api/size-guides');
+            if (!res.ok) throw new Error('Beden kayıtları getirilemedi');
+            guides = await res.json();
+            renderTable();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Beklenmeyen bir hata oluştu', 'danger');
+        }
+    }
+
+    function resetForm() {
+        currentId = null;
+        form.reset();
+        activeInput.checked = true;
+        setTimeout(() => valueInput.focus(), 150);
+    }
+
+    function populateForm(guide) {
+        currentId = guide.id;
+        valueInput.value = resolveValue(guide);
+        activeInput.checked = !!guide.isActive;
+    }
+
+    async function submitForm() {
+        try {
+            const value = valueInput.value.trim();
+            const isActive = activeInput.checked;
+
+            if (!value) {
+                showAlert('Beden değeri zorunludur.', 'warning');
+                return;
+            }
+
+            const payload = { value, isActive };
+            const endpoint = currentId ? `/api/size-guides/${currentId}` : '/api/size-guides';
+            const method = currentId ? 'PUT' : 'POST';
+
+            const res = await fetch(endpoint, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                let result = {};
+                try {
+                    result = await res.json();
+                } catch (parseError) {
+                    // yoksay
+                }
+                throw new Error(result.details || result.error || 'Kayıt sırasında hata oluştu');
+            }
+
+            modal.hide();
+            showAlert('Beden kaydı kaydedildi');
+            await loadGuides();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Beden kaydı kaydedilirken hata oluştu', 'danger');
+        }
+    }
+
+    async function toggleGuide(id) {
+        const guide = guides.find(item => item.id === id);
+        if (!guide) return;
+
+        try {
+            const res = await fetch(`/api/size-guides/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isActive: !guide.isActive })
+            });
+            if (!res.ok) {
+                let result = {};
+                try {
+                    result = await res.json();
+                } catch (parseError) {
+                    // yoksay
+                }
+                throw new Error(result.details || result.error || 'Durum güncellenemedi');
+            }
+            showAlert('Beden kaydı durumu güncellendi');
+            await loadGuides();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Durum güncellenirken hata oluştu', 'danger');
+        }
+    }
+
+    async function deleteGuide(id) {
+        if (!confirm('Bu bedeni silmek istiyor musunuz?')) return;
+        try {
+            const res = await fetch(`/api/size-guides/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                let result = {};
+                try {
+                    result = await res.json();
+                } catch (parseError) {
+                    // yoksay
+                }
+                throw new Error(result.details || result.error || 'Beden kaydı silinemedi');
+            }
+            showAlert('Beden kaydı silindi');
+            await loadGuides();
+        } catch (error) {
+            console.error(error);
+            showAlert(error.message || 'Beden kaydı silinirken hata oluştu', 'danger');
+        }
+    }
+
+    tableBody.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+
+        const row = button.closest('tr');
+        const id = Number(row.dataset.id);
+        const guide = guides.find(item => item.id === id);
+        if (!guide) return;
+
+        if (button.dataset.action === 'edit') {
+            resetForm();
+            populateForm(guide);
+            modal.show();
+            return;
+        }
+
+        if (button.dataset.action === 'toggle') {
+            toggleGuide(id);
+            return;
+        }
+
+        if (button.dataset.action === 'delete') {
+            deleteGuide(id);
+            return;
+        }
+    });
+
+    addBtn.addEventListener('click', () => {
+        resetForm();
+        modal.show();
+    });
+
+    saveBtn.addEventListener('click', submitForm);
+    searchInput.addEventListener('input', renderTable);
+    includeInactiveSwitch.addEventListener('change', renderTable);
+    refreshBtn.addEventListener('click', loadGuides);
+
+    loadGuides();
+});
+</script>
+

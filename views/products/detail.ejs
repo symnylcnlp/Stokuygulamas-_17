@@ -1,0 +1,132 @@
+<div class="row">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="/products">Ürünler</a></li>
+                <li class="breadcrumb-item active" id="productName"></li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title" id="productTitle"></h1>
+                <p class="text-muted mb-4" id="productCode"></p>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Perakende Fiyat</h5>
+                        <p class="h3 text-primary" id="retailPrice"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Bayi Fiyat</h5>
+                        <p class="h3 text-success" id="wholesalePrice"></p>
+                    </div>
+                </div>
+
+                <h5>Açıklama</h5>
+                <p id="description" class="mb-4"></p>
+
+                <h5>Ürün Detayları</h5>
+                <p id="details" class="mb-4"></p>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Bedenler</h5>
+                        <div id="sizes" class="mb-3"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Renkler</h5>
+                        <div id="colors" class="mb-3"></div>
+                    </div>
+                </div>
+
+                <div class="alert" id="stockAlert" role="alert"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Hızlı İşlemler</h5>
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-warning" id="editButton">
+                        <i class="bi bi-pencil"></i> Düzenle
+                    </a>
+                    <button class="btn btn-danger" id="deleteButton">
+                        <i class="bi bi-trash"></i> Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Ürün ID'sini URL'den al
+const productId = window.location.pathname.split('/').pop();
+
+// Ürün detaylarını yükle
+fetch(`/api/products/${productId}`)
+    .then(response => response.json())
+    .then(product => {
+        // Başlık ve breadcrumb güncelle
+        document.getElementById('productName').textContent = product.productName;
+        document.getElementById('productTitle').textContent = product.productName;
+        document.getElementById('productCode').textContent = `Ürün Kodu: ${product.productCode}`;
+        
+        // Fiyatları güncelle
+        document.getElementById('retailPrice').textContent = `₺${parseFloat(product.retailPrice).toFixed(2)}`;
+        document.getElementById('wholesalePrice').textContent = `₺${parseFloat(product.wholesalePrice).toFixed(2)}`;
+        
+        // Açıklama ve detayları güncelle
+        document.getElementById('description').textContent = product.description;
+        document.getElementById('details').textContent = product.details;
+        
+        // Bedenler
+        const sizesContainer = document.getElementById('sizes');
+        product.sizes.forEach(size => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-secondary me-2';
+            badge.textContent = size;
+            sizesContainer.appendChild(badge);
+        });
+        
+        // Renkler
+        const colorsContainer = document.getElementById('colors');
+        product.colors.forEach(color => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-2';
+            badge.textContent = color;
+            colorsContainer.appendChild(badge);
+        });
+        
+        // Stok durumu
+        const stockAlert = document.getElementById('stockAlert');
+        if (product.stock > 0) {
+            stockAlert.className = 'alert alert-success';
+            stockAlert.innerHTML = `<i class="bi bi-check-circle"></i> Stokta ${product.stock} adet var`;
+        } else {
+            stockAlert.className = 'alert alert-danger';
+            stockAlert.innerHTML = `<i class="bi bi-x-circle"></i> Stokta yok`;
+        }
+        
+        // Düzenleme butonu
+        document.getElementById('editButton').href = `/admin/products/${productId}/edit`;
+    })
+    .catch(error => console.error('Ürün yüklenirken hata:', error));
+
+// Silme işlemi
+document.getElementById('deleteButton').addEventListener('click', function() {
+    if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
+        fetch(`/api/products/${productId}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/products';
+                }
+            })
+            .catch(error => console.error('Silme hatası:', error));
+    }
+});
+</script>
